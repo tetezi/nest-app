@@ -9,7 +9,6 @@ import {
   ManyToMany,
 } from 'typeorm';
 import { Role } from './role.entity';
-
 @Entity('user') // 指定数据库中的表名
 @Unique(['userNo']) // 确保username是唯一的
 export class User {
@@ -41,7 +40,6 @@ export class User {
   @CreateDateColumn() // 创建时间，自动填充
   createdAt: Date;
 
-  @UpdateDateColumn() // 更新时间，每次更新记录时自动填充
+  @UpdateDateColumn() // 更新时间
   updatedAt: Date;
-
 }

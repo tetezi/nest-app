@@ -17,7 +17,7 @@ export class Role {
   @Column({ length: 50, unique: true }) // 角色名称，最大长度50且唯一
   name: string;
 
-  @Column({ length: 255 }) // 角色描述，最大长度255
+  @Column({ length: 255, nullable: true }) // 角色描述，最大长度255
   description: string;
 
   @CreateDateColumn() // 创建时间
