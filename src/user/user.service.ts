@@ -22,16 +22,10 @@ export class UserService {
     const { page, limit } = paginationQuery;
     const skip = (page - 1) * limit;
 
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(
-          this.userRepository.find({
-            relations: ['roles'],
-            skip: skip,
-            take: limit,
-          }),
-        );
-      }, 5000);
+    return this.userRepository.find({
+      relations: ['roles'],
+      skip: skip,
+      take: limit,
     });
   }
   async findOne(id: string): Promise<User> {

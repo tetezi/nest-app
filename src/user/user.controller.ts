@@ -11,6 +11,7 @@ export class UserController {
 
   @Get('findAll')
   findAll(@Query() paginationQuery: PaginationQueryDto) {
+    console.log(paginationQuery, typeof paginationQuery);
     return this.userService.findAll(paginationQuery);
   }
   @Get('findOne/:id')
