@@ -1,3 +1,11 @@
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 // 递归地解析输入中的所有 Promise 对象
 async function deepResolvePromises(input) {
   // 如果输入是 Promise 对象，则等待其解析
@@ -33,4 +41,14 @@ async function deepResolvePromises(input) {
   return input;
 }
 
-export default deepResolvePromises;
+@Injectable()
+//  用于解析数据中的Promise的拦截器
+export class ResolvePromisesInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    return next.handle().pipe(
+      map((data) => {
+        return deepResolvePromises(data);
+      }),
+    );
+  }
+}

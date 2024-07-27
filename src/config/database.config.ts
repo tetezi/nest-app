@@ -9,7 +9,7 @@ import {
   ValidateIf,
   IsBoolean,
 } from 'class-validator';
-import validateConfig from '../utils/validate-config';
+import validateConfig from '../common/validate-config';
 
 export type DatabaseConfig = {
   url?: string;

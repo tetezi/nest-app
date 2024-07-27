@@ -1,18 +1,38 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { Exclude, Expose } from 'class-transformer';
+import { WrapResponseInterceptor } from 'src/common/interceptors/wrap-response.interceptor';
+
+export class UserDto {
+  @Exclude()
+  password: string;
+
+  @Expose()
+  email: string;
+}
 @ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('findAll')
-  findAll(@Query() paginationQuery: PaginationQueryDto) {
-    console.log(paginationQuery, typeof paginationQuery);
-    return this.userService.findAll(paginationQuery);
+  async findAll(@Query() paginationQuery: PaginationQueryDto) {
+    // console.log(paginationQuery, typeof paginationQuery);
+    const a = await this.userService.findAll(paginationQuery);
+    console.log(a);
+    return a;
   }
   @Get('findOne/:id')
   findOne(@Param('id') id: string) {

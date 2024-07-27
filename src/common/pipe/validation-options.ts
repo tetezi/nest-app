@@ -29,7 +29,8 @@ const validationOptions: ValidationPipeOptions = {
   },
   exceptionFactory: (errors: ValidationError[]) => {
     return new UnprocessableEntityException({
-      status: HttpStatus.UNPROCESSABLE_ENTITY,
+      statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+      message: 'Request parameter format validation failed',
       errors: generateErrors(errors),
     });
   },

@@ -1,14 +1,8 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {
-  ClassSerializerInterceptor,
-  ValidationPipe,
-  VersioningType,
-} from '@nestjs/common';
+import { ClassSerializerInterceptor, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import validationOptions from './utils/validation-options';
-import { ResolvePromisesInterceptor } from './utils/serializer.interceptor';
 import { AllConfigType } from './config';
 
 // 引导应用程序启动的主函数
@@ -20,11 +14,9 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   // 使用全局管道进行验证
-  app.useGlobalPipes(new ValidationPipe(validationOptions));
+  // app.useGlobalPipes(new ValidationPipe(validationOptions));
   // 使用全局拦截器
   app.useGlobalInterceptors(
-    // 解析Promise拦截器
-    new ResolvePromisesInterceptor(),
     // 类序列化拦截器
     new ClassSerializerInterceptor(app.get(Reflector)),
   );
