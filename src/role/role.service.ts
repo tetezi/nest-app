@@ -3,6 +3,7 @@ import { SaveRoleDto } from './dto/save-role.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SetRoleMenusDto } from './dto/set-role-menus.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { SetRoleUsersDto } from './dto/set-role-users.dto';
 
 @Injectable()
 export class RoleService {
@@ -37,15 +38,12 @@ export class RoleService {
       where: { id: id },
     });
   }
-  async findRoleUsersById(id: string) {
-    return (
-      await this.prisma.role.findUnique({
-        where: { id: id },
-        include: { users: true },
-      })
-    )?.users;
+
+  async delRole(id: string) {
+    return await this.prisma.role.delete({ where: { id } });
   }
-  async getMenusByRoleId(id: string) {
+
+  async getRoleMenusByRoleId(id: string) {
     return (
       await this.prisma.role.findUnique({
         where: { id: id },
@@ -53,15 +51,30 @@ export class RoleService {
       })
     )?.menus;
   }
-  async delRole(id: string) {
-    return await this.prisma.role.delete({ where: { id } });
-  }
   async setRoleMenus(setRoleMenusDto: SetRoleMenusDto) {
     const { id, menuIds } = setRoleMenusDto;
     return await this.prisma.role.update({
       where: { id },
       data: {
         menus: { connect: menuIds.map((id) => ({ id })) },
+      },
+    });
+  }
+
+  async getRoleUsersByRoleId(id: string) {
+    return (
+      await this.prisma.role.findUnique({
+        where: { id: id },
+        include: { users: true },
+      })
+    )?.users;
+  }
+  async setRoleUsers(setRoleMenusDto: SetRoleUsersDto) {
+    const { id, userIds } = setRoleMenusDto;
+    return await this.prisma.role.update({
+      where: { id },
+      data: {
+        users: { connect: userIds.map((id) => ({ id })) },
       },
     });
   }
