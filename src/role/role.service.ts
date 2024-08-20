@@ -26,8 +26,8 @@ export class RoleService {
     });
   }
 
-  getRoles(paginationQueryDto: PaginationQueryDto) {
-    return this.prisma.extendsService.role.findManyByPagination(
+  async getRoles(paginationQueryDto: PaginationQueryDto) {
+    return await this.prisma.extendsService.role.findManyByPagination(
       paginationQueryDto,
     );
   }
