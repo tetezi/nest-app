@@ -1,9 +1,9 @@
 import { appConfigFactory, type AppConfig } from './app.config';
-import { databaseConfigFactory, type DatabaseConfig } from './database.config';
+import { AuthConfig, authConfigFactory } from './auth.config';
 
 export type AllConfigType = {
   app: AppConfig;
-  database: DatabaseConfig;
+  auth: AuthConfig;
 };
 
-export const allConfigFactory = [appConfigFactory, databaseConfigFactory];
+export const allConfigFactory = [appConfigFactory, authConfigFactory];

@@ -4,9 +4,9 @@ import { IsInt, IsOptional, IsPositive, Min } from 'class-validator';
 export class PaginationQueryDto {
   @IsInt()
   @Min(1)
-  page: number;
+  pageIndex: number;
 
   @IsInt()
   @Min(1)
-  limit: number;
+  pageSize: number;
 }

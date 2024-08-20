@@ -7,9 +7,9 @@ import {
   IsArray,
   IsUUID,
   IsOptional,
+  IsEmail,
+  IsPhoneNumber,
 } from 'class-validator';
-import { Role } from '../entities/role.entity';
-import { Type } from 'class-transformer';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'John Doe', description: 'Name of the user' })
@@ -25,6 +25,14 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsEmail()
+  @IsOptional()
+  email: string;
+
+  @IsPhoneNumber()
+  @IsOptional()
+  phone: string;
 
   @IsOptional()
   @IsUUID('4', { each: true })

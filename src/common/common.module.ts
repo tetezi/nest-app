@@ -6,21 +6,22 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { LoggingMiddleware } from './middleware/logging.middleware';
-import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ApiKeyGuard } from './guards/api-key.guard';
 import { TimeoutInterceptor } from './interceptors/timeout.interceptor';
 import { WrapResponseInterceptor } from './interceptors/wrap-response.interceptor';
 import validationOptions from './pipe/validation-options';
 import { ResolvePromisesInterceptor } from './interceptors/resolve-promises';
-
+import { ErrorInterceptor } from './interceptors/error.interceptor';
+import { OptionalUUIDPipe } from './pipe/optionalUUID.pipe';
 @Module({
   providers: [
-    {
-      provide: APP_GUARD,
-      // 全局API密钥守卫，用于验证API请求
-      useClass: ApiKeyGuard,
-    },
-
+    // {
+    //   provide: APP_GUARD,
+    //   // 全局API密钥守卫，用于验证API请求
+    //   useClass: ApiKeyGuard,
+    // },
+    // { provide: APP_FILTER, useClass: PrismaClientExceptionFilter },
     {
       provide: APP_INTERCEPTOR,
       // 全局拦截器，用于解析Promise
@@ -33,13 +34,18 @@ import { ResolvePromisesInterceptor } from './interceptors/resolve-promises';
       useClass: WrapResponseInterceptor,
     },
     /**
-     * 暂时关闭超时拦截器，未确定覆盖超时方案
+     * TODO: 未确定覆盖超时方案，后续修改方案
      */
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   // 全局拦截器，用于处理请求超时
-    //   useClass: TimeoutInterceptor,
-    // },
+    {
+      provide: APP_INTERCEPTOR,
+      // 全局拦截器，用于处理请求超时
+      useClass: TimeoutInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      // 全局拦截器，用于处理错误
+      useClass: ErrorInterceptor,
+    },
 
     {
       provide: APP_PIPE,

@@ -1,12 +1,12 @@
-import { HttpException, HttpStatus, Module } from '@nestjs/common';
-import { UserModule } from './user/user.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import * as Joi from '@hapi/joi';
 import { CommonModule } from './common/common.module';
-import { TypeOrmConfigService } from './database/typeorm-config.service';
-import { DataSource, DataSourceOptions } from 'typeorm';
 import { allConfigFactory } from './config';
+import { PrismaModule } from './prisma/prisma.module';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
+import { RoleModule } from './role/role.module';
+import { MenuModule } from './menu/menu.module';
 
 @Module({
   imports: [
@@ -14,14 +14,12 @@ import { allConfigFactory } from './config';
       load: allConfigFactory,
       isGlobal: true,
     }),
-    TypeOrmModule.forRootAsync({
-      useClass: TypeOrmConfigService,
-      dataSourceFactory: async (options: DataSourceOptions) => {
-        return new DataSource(options).initialize();
-      },
-    }),
-    UserModule,
+    PrismaModule,
+    AuthModule,
     CommonModule,
+    UserModule,
+    RoleModule,
+    MenuModule,
   ],
 })
 export class AppModule {}

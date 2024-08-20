@@ -1,49 +1,55 @@
 import {
-  Body,
   Controller,
   Get,
-  Param,
   Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseUUIDPipe,
   Query,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { Exclude, Expose } from 'class-transformer';
-import { WrapResponseInterceptor } from 'src/common/interceptors/wrap-response.interceptor';
-
-export class UserDto {
-  @Exclude()
-  password: string;
-
-  @Expose()
-  email: string;
-}
+import { RequiredUUIDPipe } from 'src/common/pipe/optionalUUID.pipe';
+import { AuthGuard } from '@nestjs/passport';
+import { SetUserRolesDto } from './dto/set-user-roles.dto';
 @ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Post('create')
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
+  }
+  @Post('setUserRoles')
+  setUserRoles(@Body() setUserRolesDto: SetUserRolesDto) {
+    return this.userService.setUserRoles(setUserRolesDto);
+  }
   @Get('findAll')
-  async findAll(@Query() paginationQuery: PaginationQueryDto) {
-    // console.log(paginationQuery, typeof paginationQuery);
-    const a = await this.userService.findAll(paginationQuery);
-    console.log(a);
-    return a;
+  findAll() {
+    return this.userService.findAll();
   }
-  @Get('findOne/:id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+
+  @Get('findOne')
+  findOne(@Query('id', RequiredUUIDPipe) id: string) {
+    return this.userService.findUserById(id);
   }
-  @Post('createUser')
-  createUser(@Body() body: CreateUserDto) {
-    return this.userService.create(body);
-  }
-  @Post('updateUser')
-  updateUser(@Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(updateUserDto);
+
+  // @Post('update')
+  // update(
+  //   @Query('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  //   @Body() updateUserDto: UpdateUserDto,
+  // ) {
+  //   return this.userService.update(id, updateUserDto);
+  // }
+
+  @Post('remove')
+  remove(@Query('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return this.userService.remove(id);
   }
 }

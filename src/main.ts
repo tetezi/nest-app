@@ -7,7 +7,7 @@ import { AllConfigType } from './config';
 
 // 引导应用程序启动的主函数
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   const configService = app.get(ConfigService<AllConfigType>);
   // 启用版本控制功能
   app.enableVersioning({
@@ -38,6 +38,8 @@ async function bootstrap() {
 
   // 启动应用并监听指定端口;
   await app.listen(configService.getOrThrow('app.port', { infer: true }));
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(
+    `Application is running on: ${await app.getUrl()}\n docs is running on ${await app.getUrl()}/docs`,
+  );
 }
 void bootstrap();

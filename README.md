@@ -45,6 +45,19 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Prisma 数据库迁移指令
+
+```bash
+# 生成新的迁移
+$ npx prisma migrate dev --name migration_name
+
+# 应用未被应用的迁移
+$ npx prisma migrate deploy
+
+# 标记迁移文件已被应用
+$ npx prisma migrate resolve --applied migration_name
+```
+
 ## Test
 
 ```bash

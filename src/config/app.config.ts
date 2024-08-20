@@ -31,12 +31,12 @@ export type AppConfig = {
 };
 
 export const appConfigFactory = registerAs<AppConfig>('app', () => {
-  validateConfig(process.env, EnvironmentVariablesValidator);
+  const env = validateConfig(process.env, EnvironmentVariablesValidator);
 
   return {
-    nodeEnv: process.env.NODE_ENV || 'development',
+    nodeEnv: env.NODE_ENV || 'development',
     workingDirectory: process.env.PWD || process.cwd(),
-    port: process.env.APP_PORT ? parseInt(process.env.APP_PORT, 10) : 3000,
-    apiPrefix: process.env.API_PREFIX || 'api',
+    port: env.APP_PORT || 3000,
+    apiPrefix: env.API_PREFIX || 'api',
   };
 });
