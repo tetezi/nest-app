@@ -26,16 +26,20 @@ export const defineExtension = Prisma.defineExtension((client) => {
         $allModels: {
           async findManyByPagination<T>(
             this: T,
-            args: Prisma.Args<T, 'findMany'> & PaginationQueryDto,
+            page: PaginationQueryDto,
+            args?: Prisma.Args<T, 'findMany'>,
           ) {
-            const { pageIndex = 1, pageSize = 10, ...rest } = args;
+            const { pageIndex = 1, pageSize = 10 } = page;
             const context = Prisma.getExtensionContext(this);
             const rows = await (this as any).findMany({
-              ...rest,
+              ...args,
               skip: (pageIndex - 1) * pageSize,
               take: pageSize,
             });
-            const total = await (context as any).count(rest);
+            const total = await (context as any).count({
+              ...args,
+              select: undefined,
+            });
             return {
               rows,
               total,
