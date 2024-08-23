@@ -17,6 +17,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { RequiredUUIDPipe } from 'src/common/pipe/optionalUUID.pipe';
 import { AuthGuard } from '@nestjs/passport';
 import { SetUserRolesDto } from './dto/set-user-roles.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 @ApiTags('user')
 @Controller('user')
 export class UserController {
@@ -30,9 +31,9 @@ export class UserController {
   setUserRoles(@Body() setUserRolesDto: SetUserRolesDto) {
     return this.userService.setUserRoles(setUserRolesDto);
   }
-  @Get('findAll')
-  findAll() {
-    return this.userService.findAll();
+  @Get('getAllUsers')
+  getAllUsers(@Query() paginationQueryDto: PaginationQueryDto) {
+    return this.userService.getAllUsers(paginationQueryDto);
   }
 
   @Get('findOne')

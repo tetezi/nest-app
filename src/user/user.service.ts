@@ -3,6 +3,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { SetUserRolesDto } from './dto/set-user-roles.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { Prisma } from '@prisma/client';
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
@@ -21,8 +23,19 @@ export class UserService {
       },
     });
   }
-  async findAll() {
-    return this.prisma.user.findMany();
+  async getAllUsers(paginationQueryDto: PaginationQueryDto) {
+    return this.prisma.extendsService.user.findManyByPagination(
+      paginationQueryDto,
+      {
+        select: {
+          id: true,
+          name: true,
+          userNo: true,
+          email: true,
+          phone: true,
+        },
+      },
+    );
   }
   async findUserById(id: string) {
     return await this.prisma.user.findUnique({
