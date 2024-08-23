@@ -69,12 +69,36 @@ export class RoleService {
       })
     )?.users;
   }
-  async setRoleUsers(setRoleMenusDto: SetRoleUsersDto) {
-    const { id, userIds } = setRoleMenusDto;
+  // async setRoleUsers(setRoleMenusDto: SetRoleUsersDto) {
+  //   const { id, userIds } = setRoleMenusDto;
+  //   return await this.prisma.role.update({
+  //     where: { id },
+  //     data: {
+  //       users: { connect: userIds.map((id) => ({ id })) },
+  //     },
+  //   });
+  // }
+  /**
+   * 将用户分配给角色。
+   */
+  async assignUsersToRole(setRoleUsersDto: SetRoleUsersDto) {
+    const { id, userIds } = setRoleUsersDto;
     return await this.prisma.role.update({
       where: { id },
       data: {
         users: { connect: userIds.map((id) => ({ id })) },
+      },
+    });
+  }
+  /**
+   * 从角色中移除用户
+   */
+  async removeUsersFromRole(setRoleUsersDto: SetRoleUsersDto) {
+    const { id, userIds } = setRoleUsersDto;
+    return await this.prisma.role.update({
+      where: { id },
+      data: {
+        users: { disconnect: userIds.map((id) => ({ id })) },
       },
     });
   }

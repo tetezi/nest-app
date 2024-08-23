@@ -50,9 +50,13 @@ export class RoleController {
     return this.roleService.getRoleMenusByRoleId(id);
   }
 
-  @Post('setRoleUsers')
-  setRoleUsers(@Body() setRoleUsersDto: SetRoleUsersDto) {
-    return this.roleService.setRoleUsers(setRoleUsersDto);
+  @Post('assignUsersToRole')
+  assignUsersToRole(@Body() setRoleUsersDto: SetRoleUsersDto) {
+    return this.roleService.assignUsersToRole(setRoleUsersDto);
+  }
+  @Post('removeUsersFromRole')
+  removeUsersFromRole(@Body() setRoleUsersDto: SetRoleUsersDto) {
+    return this.roleService.removeUsersFromRole(setRoleUsersDto);
   }
   @Get('getRoleUsersByRoleId')
   getRoleUsersByRoleId(@Query('id', RequiredUUIDPipe) id: string) {
