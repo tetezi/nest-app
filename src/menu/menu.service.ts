@@ -1,16 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SaveMenuDto } from './dto/save-menu.dto';
-import { CreateMenuDto } from './dto/create-menu.dto';
 
 @Injectable()
 export class MenuService {
   constructor(private prisma: PrismaService) {}
-  async create(createMenuDto: CreateMenuDto) {
-    return await this.prisma.menu.create({
-      data: createMenuDto,
-    });
-  }
   async saveMenu(saveMenuDto: SaveMenuDto) {
     return await this.prisma.menu.upsert({
       where: { id: saveMenuDto.id || '' },

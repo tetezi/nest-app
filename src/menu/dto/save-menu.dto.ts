@@ -1,3 +1,4 @@
+import { MenuType } from '@prisma/client';
 import {
   IsString,
   IsNotEmpty,
@@ -9,11 +10,6 @@ import {
   IsBoolean,
 } from 'class-validator';
 
-enum MenuType {
-  Iframe = 'Iframe',
-  View = 'View',
-  Group = 'Group',
-}
 export class SaveMenuDto {
   @IsOptional()
   @IsUUID('4')

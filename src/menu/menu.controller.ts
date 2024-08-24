@@ -3,17 +3,12 @@ import { MenuService } from './menu.service';
 import { RequiredUUIDPipe } from 'src/common/pipe/optionalUUID.pipe';
 import { ApiTags } from '@nestjs/swagger';
 import { SaveMenuDto } from './dto/save-menu.dto';
-import { CreateMenuDto } from './dto/create-menu.dto';
 
 @ApiTags('menu')
 @Controller('menu')
 export class MenuController {
   constructor(private readonly menuService: MenuService) {}
 
-  @Post('create')
-  create(@Body() createMenuDto: CreateMenuDto) {
-    return this.menuService.create(createMenuDto);
-  }
   @Post('saveMenu')
   saveMenu(@Body() saveMenuDto: SaveMenuDto) {
     return this.menuService.saveMenu(saveMenuDto);
