@@ -32,6 +32,12 @@
 $ npm install
 ```
 
+## 生成一个新的 NestJS 资源。
+
+```bash
+$ nest generate resource name
+```
+
 ## Running the app
 
 ```bash
