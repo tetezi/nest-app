@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-
+import { omit } from 'lodash';
 export const defineExtension = Prisma.defineExtension((client) => {
   return client
     .$extends({
@@ -31,14 +31,13 @@ export const defineExtension = Prisma.defineExtension((client) => {
           ) {
             const { pageIndex = 1, pageSize = 10 } = page;
             const context = Prisma.getExtensionContext(this);
-            const rows = await (this as any).findMany({
+            const rows = await (context as any).findMany({
               ...args,
               skip: (pageIndex - 1) * pageSize,
               take: pageSize,
             });
             const total = await (context as any).count({
-              ...args,
-              select: undefined,
+              ...omit(args, ['select', 'include']),
             });
             return {
               rows,
