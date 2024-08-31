@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { RoleModule } from './role/role.module';
 import { MenuModule } from './menu/menu.module';
+import { DynamicModule } from './dynamic/dynamic.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MenuModule } from './menu/menu.module';
     UserModule,
     RoleModule,
     MenuModule,
+    DynamicModule,
   ],
 })
 export class AppModule {}
