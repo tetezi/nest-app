@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TableService } from '../table/table.service';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { Col, SubTableQueryStrategy } from '@prisma/client';
+import { Col } from '@prisma/client';
+import { PaginationQueryType } from 'src/common/types/pagination-query.type';
 @Injectable()
 export class TableRecoredService {
   constructor(
@@ -232,17 +232,14 @@ export class TableRecoredService {
     });
   }
 
-  async getTableRecoreds(
-    tableId: string,
-    paginationQueryDto: PaginationQueryDto,
-  ) {
+  async getTableRecoreds(tableId: string, pageQuery: PaginationQueryType) {
     const { tableName, cols } = await this.getTableConfig(tableId);
     const entity = await this.getTableEntity(tableName);
     const select = await this.getTableSelectForFind(entity, cols);
     console.log({
       select,
     });
-    return await entity.findManyByPagination(paginationQueryDto, {
+    return await entity.findManyByPagination(pageQuery, {
       select: select,
     });
   }

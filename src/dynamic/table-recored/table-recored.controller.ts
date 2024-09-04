@@ -1,16 +1,8 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { TableRecoredService } from './table-recored.service';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { PaginationQueryPipe } from 'src/common/pipe/paginationQueryPipe.pipe';
+import { PaginationQueryType } from 'src/common/types/pagination-query.type';
 
 @ApiTags('dynamic/tableRecored')
 @Controller('/dynamic/tableRecored')
@@ -29,14 +21,11 @@ export class TableRecoredController {
   }
 
   @Get('getTableRecoreds')
-  getTableRecoreds(
+  getTgetTableRecoredsables(
     @Query('tableId') tableId: string,
-    @Query() paginationQueryDto: PaginationQueryDto,
+    @Query(PaginationQueryPipe) page: PaginationQueryType,
   ) {
-    return this.tableRecoredService.getTableRecoreds(
-      tableId,
-      paginationQueryDto,
-    );
+    return this.tableRecoredService.getTableRecoreds(tableId, page);
   }
 
   @Get('getTableRecored')

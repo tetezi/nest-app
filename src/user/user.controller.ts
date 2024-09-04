@@ -3,21 +3,16 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   ParseUUIDPipe,
   Query,
-  UseInterceptors,
-  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { RequiredUUIDPipe } from 'src/common/pipe/optionalUUID.pipe';
-import { AuthGuard } from '@nestjs/passport';
+import { RequiredUUIDPipe } from 'src/common/pipe/requiredUUID.pipe';
 import { SetUserRolesDto } from './dto/set-user-roles.dto';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationQueryType } from 'src/common/types/pagination-query.type';
+import { PaginationQueryPipe } from 'src/common/pipe/paginationQueryPipe.pipe';
 @ApiTags('user')
 @Controller('user')
 export class UserController {
@@ -32,8 +27,8 @@ export class UserController {
     return this.userService.setUserRoles(setUserRolesDto);
   }
   @Get('getAllUsers')
-  getAllUsers(@Query() paginationQueryDto: PaginationQueryDto) {
-    return this.userService.getAllUsers(paginationQueryDto);
+  getAllUsers(@Query(PaginationQueryPipe) pageQuery: PaginationQueryType) {
+    return this.userService.getAllUsers(pageQuery);
   }
 
   @Get('findOne')

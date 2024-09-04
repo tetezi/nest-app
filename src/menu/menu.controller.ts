@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { MenuService } from './menu.service';
-import { RequiredUUIDPipe } from 'src/common/pipe/optionalUUID.pipe';
+import { RequiredUUIDPipe } from 'src/common/pipe/requiredUUID.pipe';
 import { ApiTags } from '@nestjs/swagger';
 import { SaveMenuDto } from './dto/save-menu.dto';
 

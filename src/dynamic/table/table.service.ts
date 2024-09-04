@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { SaveTableColDto, SaveTableDto } from './dto/save-table.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationQueryType } from 'src/common/types/pagination-query.type';
+import { SaveTableDto } from './dto/save-table.dto';
 
 @Injectable()
 export class TableService {
@@ -69,7 +69,7 @@ export class TableService {
     }
   }
 
-  async getTables(paginationQueryDto: PaginationQueryDto) {
+  async getTables(paginationQueryDto: PaginationQueryType) {
     return this.prisma.extendsService.table.findManyByPagination(
       paginationQueryDto,
       {

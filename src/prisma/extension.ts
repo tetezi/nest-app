@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { omit } from 'lodash';
+import { PaginationQueryType } from 'src/common/types/pagination-query.type';
 export const defineExtension = Prisma.defineExtension((client) => {
   return client
     .$extends({
@@ -26,23 +26,27 @@ export const defineExtension = Prisma.defineExtension((client) => {
         $allModels: {
           async findManyByPagination<T>(
             this: T,
-            page: PaginationQueryDto,
+            page?: PaginationQueryType,
             args?: Prisma.Args<T, 'findMany'>,
           ) {
-            const { pageIndex = 1, pageSize = 10 } = page;
             const context = Prisma.getExtensionContext(this);
-            const rows = await (context as any).findMany({
-              ...args,
-              skip: (pageIndex - 1) * pageSize,
-              take: pageSize,
-            });
-            const total = await (context as any).count({
-              ...omit(args, ['select', 'include']),
-            });
-            return {
-              rows,
-              total,
-            };
+            if (page) {
+              const { pageIndex = 1, pageSize = 10 } = page;
+              const rows = await (context as any).findMany({
+                ...args,
+                skip: (pageIndex - 1) * pageSize,
+                take: pageSize,
+              });
+              const total = await (context as any).count({
+                ...omit(args, ['select', 'include']),
+              });
+              return {
+                rows,
+                total,
+              };
+            } else {
+              return await (context as any).findMany(args);
+            }
           },
         },
       },

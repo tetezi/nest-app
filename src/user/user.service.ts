@@ -3,8 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { SetUserRolesDto } from './dto/set-user-roles.dto';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { Prisma } from '@prisma/client';
+import { PaginationQueryType } from 'src/common/types/pagination-query.type';
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
@@ -23,9 +22,9 @@ export class UserService {
       },
     });
   }
-  async getAllUsers(paginationQueryDto: PaginationQueryDto) {
+  async getAllUsers(paginationQuery: PaginationQueryType) {
     return this.prisma.extendsService.user.findManyByPagination(
-      paginationQueryDto,
+      paginationQuery,
       {
         select: {
           id: true,

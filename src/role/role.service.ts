@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { SaveRoleDto } from './dto/save-role.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SetRoleMenusDto } from './dto/set-role-menus.dto';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { SetRoleUsersDto } from './dto/set-role-users.dto';
+import { PaginationQueryType } from 'src/common/types/pagination-query.type';
 
 @Injectable()
 export class RoleService {
@@ -27,9 +27,9 @@ export class RoleService {
     });
   }
 
-  async getRoles(paginationQueryDto: PaginationQueryDto) {
+  async getRoles(paginationQuery: PaginationQueryType) {
     return await this.prisma.extendsService.role.findManyByPagination(
-      paginationQueryDto,
+      paginationQuery,
     );
   }
 

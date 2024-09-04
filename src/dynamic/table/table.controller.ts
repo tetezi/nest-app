@@ -10,9 +10,10 @@ import {
 } from '@nestjs/common';
 import { TableService } from './table.service';
 import { SaveTableDto } from './dto/save-table.dto';
-import { RequiredUUIDPipe } from 'src/common/pipe/optionalUUID.pipe';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { RequiredUUIDPipe } from 'src/common/pipe/requiredUUID.pipe';
 import { ApiTags } from '@nestjs/swagger';
+import { PaginationQueryPipe } from 'src/common/pipe/paginationQueryPipe.pipe';
+import { PaginationQueryType } from 'src/common/types/pagination-query.type';
 
 @ApiTags('dynamic/table')
 @Controller('/dynamic/table')
@@ -25,8 +26,8 @@ export class TableController {
   }
 
   @Get('getTables')
-  getTables(@Query() paginationQueryDto: PaginationQueryDto) {
-    return this.tableService.getTables(paginationQueryDto);
+  getTables(@Query(PaginationQueryPipe) page: PaginationQueryType) {
+    return this.tableService.getTables(page);
   }
 
   @Get('getTable')
