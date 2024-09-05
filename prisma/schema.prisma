@@ -55,14 +55,15 @@ model Menu {
 }
 
 model Table {
-  id          String   @id @default(uuid()) @db.VarChar(36)
-  name        String   @unique() @db.VarChar(50)
-  tableName   String   @db.VarChar(50)
-  description String?  @db.VarChar(255)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  cols        Col[]    @relation("tableCols")
-  parentCols  Col[]    @relation("parentSubTableCols")
+  id                  String                @id @default(uuid()) @db.VarChar(36)
+  name                String                @unique() @db.VarChar(50)
+  tableName           String                @db.VarChar(50)
+  description         String?               @db.VarChar(255)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  cols                Col[]                 @relation("tableCols")
+  parentCols          Col[]                 @relation("parentSubTableCols")
+  dynamicFormViewComp DynamicFormViewComp[] @relation("dynamicFormViewCompTable")
 }
 
 enum ColType {
@@ -107,13 +108,56 @@ model Col {
 }
 
 model DynamicForm {
-  id          String   @id @default(uuid()) @db.VarChar(36)
-  name        String   @db.VarChar(50)
-  schemas     Json
-  description String?  @db.VarChar(255)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  String                @id @default(uuid()) @db.VarChar(36)
+  name                String                @db.VarChar(50)
+  // dynamicFormSchemas DynamicFormSchemas[] @relation("dynamicFormSchemas")
+  schemas             Json
+  description         String?               @db.VarChar(255)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  dynamicFormViewComp DynamicFormViewComp[] @relation("dynamicFormViewCompForm")
 }
+
+enum DynamicFormViewCompDataSourceType {
+  DynamicTable
+  // OtherTable
+}
+
+enum DynamicFormViewCompFormSourceType {
+  DynamicForm
+  // OtherForm
+}
+
+model DynamicFormViewComp {
+  id             String                            @id @default(uuid()) @db.VarChar(36)
+  name           String                            @db.VarChar(50)
+  description    String?                           @db.VarChar(255)
+  createdAt      DateTime                          @default(now())
+  updatedAt      DateTime                          @updatedAt
+  dataSourceType DynamicFormViewCompDataSourceType
+  //TODO ： 此处仍需添加其他数据源配置，如分页，保存，获取等第三方数据源api
+  dynamicTable   Table?                            @relation("dynamicFormViewCompTable", fields: [dynamicTableId], references: [id])
+  dynamicTableId String?
+  //TODO ： 此处仍需添加其他表单，如、第三方url，通过传入初始化数据及提交接口，实现表单获取保存
+  formSourceType DynamicFormViewCompFormSourceType
+  dynamicForm    DynamicForm?                      @relation("dynamicFormViewCompForm", fields: [dynamicFormId], references: [id])
+  dynamicFormId  String?
+}
+
+// model DynamicFormSchemas {
+//   id             String               @id @default(uuid()) @db.VarChar(36)
+//   name           String               @db.VarChar(50)
+//   category       String
+//   component      String
+//   description    String?              @db.VarChar(255)
+//   createdAt      DateTime             @default(now())
+//   updatedAt      DateTime             @updatedAt
+//   children       DynamicFormSchemas[] @relation("parentChildrenSchemas")
+//   parentSchema   DynamicFormSchemas?  @relation("parentChildrenSchemas", onDelete: Cascade, fields: [parentSchemaId], references: [id])
+//   parentSchemaId String 
+//   dynamicForm   DynamicForm @relation("dynamicFormSchemas", onDelete: Cascade, fields: [dynamicFormId], references: [id])
+//   dynamicFormId String      @db.VarChar(36)
+// }
 
 enum ExtraWorkApplicationType {
   // 常规加班 

@@ -43,6 +43,7 @@ async function main() {
     data: {
       name: '管理员',
       type: 'Group',
+      isEnabled: true,
       subMenus: {
         createMany: {
           data: [
@@ -51,12 +52,14 @@ async function main() {
               type: 'View',
               routerPath: '/sys/admin/menu',
               url: '/sys/admin/menu',
+              isEnabled: true,
             },
             {
               name: '角色管理',
               type: 'View',
               routerPath: '/sys/admin/role',
               url: '/sys/admin/role',
+              isEnabled: true,
             },
           ],
         },
@@ -71,6 +74,7 @@ async function main() {
     data: {
       name: '轻代码',
       type: 'Group',
+      isEnabled: true,
       subMenus: {
         createMany: {
           data: [
@@ -79,6 +83,21 @@ async function main() {
               type: 'View',
               routerPath: '/sys/dynamic/table',
               url: '/sys/dynamic/table',
+              isEnabled: true,
+            },
+            {
+              name: '表单管理',
+              type: 'View',
+              routerPath: '/sys/dynamic/form',
+              url: '/sys/dynamic/form',
+              isEnabled: true,
+            },
+            {
+              name: '视图组件管理',
+              type: 'View',
+              routerPath: '/sys/dynamic/viewComp',
+              url: '/sys/dynamic/viewComp',
+              isEnabled: true,
             },
           ],
         },
