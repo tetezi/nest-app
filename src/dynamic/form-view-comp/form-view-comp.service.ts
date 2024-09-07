@@ -12,11 +12,13 @@ export class FormViewCompService {
       dynamicTableId,
       dynamicFormId,
       name,
+      tableColumns,
       dataSourceType,
       formSourceType,
     } = saveDto;
     const data = {
       name,
+      tableColumns,
       dataSourceType,
       dynamicTable:
         dataSourceType === 'DynamicTable'
@@ -53,7 +55,7 @@ export class FormViewCompService {
   async getFormViewComp(id: string) {
     return await this.prisma.dynamicFormViewComp.findUnique({
       where: { id },
-      include: { dynamicForm: true, dynamicTable: true },
+      // include: { dynamicForm: true, dynamicTable: true },
     });
   }
 

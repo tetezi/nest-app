@@ -110,6 +110,7 @@ model Col {
 model DynamicForm {
   id                  String                @id @default(uuid()) @db.VarChar(36)
   name                String                @db.VarChar(50)
+  beforeSubmit        String?               @db.VarChar(255)
   // dynamicFormSchemas DynamicFormSchemas[] @relation("dynamicFormSchemas")
   schemas             Json
   description         String?               @db.VarChar(255)
@@ -129,11 +130,13 @@ enum DynamicFormViewCompFormSourceType {
 }
 
 model DynamicFormViewComp {
-  id             String                            @id @default(uuid()) @db.VarChar(36)
-  name           String                            @db.VarChar(50)
-  description    String?                           @db.VarChar(255)
-  createdAt      DateTime                          @default(now())
-  updatedAt      DateTime                          @updatedAt
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  name        String   @db.VarChar(50)
+  tableColumns     Json
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   dataSourceType DynamicFormViewCompDataSourceType
   //TODO ： 此处仍需添加其他数据源配置，如分页，保存，获取等第三方数据源api
   dynamicTable   Table?                            @relation("dynamicFormViewCompTable", fields: [dynamicTableId], references: [id])

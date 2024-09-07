@@ -8,6 +8,7 @@ import {
   IsString,
   IsNotEmpty,
   IsEnum,
+  IsJSON,
 } from 'class-validator';
 
 export class SaveFormViewCompDto {
@@ -18,6 +19,9 @@ export class SaveFormViewCompDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsJSON()
+  tableColumns: Record<string, any>[];
 
   @IsEnum(DynamicFormViewCompDataSourceType)
   dataSourceType: DynamicFormViewCompDataSourceType;
