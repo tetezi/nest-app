@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { TableService } from '../table/table.service';
 import { Col } from '@prisma/client';
 import { PaginationQueryType } from 'src/common/types/pagination-query.type';
+import { isString } from 'class-validator';
 @Injectable()
 export class TableRecoredService {
   constructor(
@@ -90,16 +91,22 @@ export class TableRecoredService {
           } else {
             if (subTableWritableStrategy === 'ConnectById') {
               if (subTableType === 'ToOne') {
-                result[col.name] = { connect: { id: value } };
+                result[col.name] = {
+                  connect: { id: isString(value) ? value : value.id },
+                };
               } else if (subTableType === 'ToMany') {
                 if (isUpdate) {
                   result[col.name] = {
                     set: [],
-                    connect: value.map((id) => ({ id })),
+                    connect: value.map((v) => ({
+                      id: isString(v) ? v : v.id,
+                    })),
                   };
                 } else {
                   result[col.name] = {
-                    connect: value.map((id) => ({ id })),
+                    connect: value.map((v) => ({
+                      id: isString(v) ? v : v.id,
+                    })),
                   };
                 }
               }
