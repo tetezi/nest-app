@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { RoleModule } from './role/role.module';
 import { MenuModule } from './menu/menu.module';
 import { DynamicModule } from './dynamic/dynamic.module';
+import { EnumModule } from './enum/enum.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { DynamicModule } from './dynamic/dynamic.module';
     RoleModule,
     MenuModule,
     DynamicModule,
+    EnumModule,
   ],
 })
 export class AppModule {}
