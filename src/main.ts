@@ -13,8 +13,6 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
   });
-  // 使用全局管道进行验证
-  // app.useGlobalPipes(new ValidationPipe(validationOptions));
   // 使用全局拦截器
   app.useGlobalInterceptors(
     // 类序列化拦截器
