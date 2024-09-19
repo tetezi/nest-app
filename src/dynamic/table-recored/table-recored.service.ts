@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TableService } from '../table/table.service';
-import { Col } from '@prisma/client';
+import { Col, Table } from '@prisma/client';
 import { PaginationQueryType } from 'src/common/types/pagination-query.type';
-import { isString } from 'class-validator';
+import { isArray, isString } from 'class-validator';
+import { EnumService } from 'src/enum/enum.service';
+import { set, get, isPlainObject } from 'lodash';
 @Injectable()
 export class TableRecoredService {
   constructor(
     private prisma: PrismaService,
+    private enumsService: EnumService,
     private tableService: TableService,
   ) {}
   async getTableConfig(tableId: string) {
@@ -26,36 +29,35 @@ export class TableRecoredService {
       throw new Error('Entity not found');
     }
   }
-  async getTableSelectForFind(entity: any, cols: Col[]) {
+  async getTableSelectForFind(cols: Col[]) {
     const getSelect = async (cols: Col[]) => {
       const reuslt = {
         id: true,
       };
 
       for (const col of cols) {
-        const { name, colType, subTableType, canQuery, subTableQueryStrategy } =
-          col;
+        const { name, colType, canQuery, subTableQueryStrategy } = col;
         if (canQuery) {
-          if (col.colType === 'SubTable') {
-            const subTable = await this.tableService.getTable(
+          if (colType === 'SubTable') {
+            const subTable = await this.getTableConfig(
               col.subTableId as string,
             );
             if (subTable) {
               if (subTableQueryStrategy === 'PartialObject') {
                 //TODO: 实现部分对象查询策略
-                reuslt[col.name] = {
+                reuslt[name] = {
                   select: await getSelect(subTable.cols),
                 };
               } else if (subTableQueryStrategy === 'FullObject') {
-                reuslt[col.name] = {
+                reuslt[name] = {
                   select: await getSelect(subTable.cols),
                 };
               }
             } else {
-              throw new Error(`<${col.name}> SubTable not found`);
+              throw new Error(`<${name}> SubTable not found`);
             }
           } else {
-            reuslt[col.name] = true;
+            reuslt[name] = true;
           }
         }
       }
@@ -76,6 +78,7 @@ export class TableRecoredService {
         subTableType,
         canWritable,
         subTableWritableStrategy,
+        enumCategoryId,
       } = col;
       if (canWritable) {
         const value = data[name];
@@ -165,40 +168,21 @@ export class TableRecoredService {
               result[col.name] = new Date(value).toISOString();
             } else if (colType === 'Int') {
               result[col.name] = Number(value);
+            } else if (colType === 'Enum') {
+              if (!enumCategoryId) {
+                throw new Error(
+                  `当前数据表未正确配置字段：[${name}]的枚举类型`,
+                );
+              }
+              const enumDetail = await this.enumsService.checkEnum(
+                enumCategoryId,
+                value,
+              );
+              result[col.name] = enumDetail.value;
             }
           }
         }
       }
-
-      /////////////////////////////////////////////////////////
-
-      // this.prisma.menu.create({
-      //   data: {
-      //     name: '',
-      //     type: 'Group',
-      //     //parentMenu: { a: '' }, 对一 create connectOrCreate connect
-      //     // subMenus: { a: '' }, 对多 create connectOrCreate connect createMany
-      //   },
-      // });
-      // this.prisma.menu.update({
-      //   where: { id: '' },
-      //   data: {
-      //     name: '',
-      //     type: 'Group',
-      //     //parentMenu: { a: '' }, 对一 create connectOrCreate upsert disconnect delete connect update,
-      //     // subMenus: { a: '' }, //对多 create connectOrCreate upsert createMany set disconnect delete connect update updateMany deleteMany
-      //   },
-      // });
-      // this.prisma.menu.update({
-      //   where: { id: '' },
-      //   data: {
-      //     name: '',
-      //     type: 'Group',
-      //     subMenus: {
-      //       set: [{ name: '' }],
-      //     },
-      //   },
-      // });
     }
     return result;
   }
@@ -207,10 +191,7 @@ export class TableRecoredService {
     const { tableName, cols } = await this.getTableConfig(tableId);
     const entity = await this.getTableEntity(tableName);
     const data = await this.getTableSelectSubsetForSave(cols, recoredData);
-    console.log({
-      转换前参数: recoredData,
-      转换后参数: data,
-    });
+
     if (id) {
       return entity.update({
         where: { id },
@@ -222,45 +203,151 @@ export class TableRecoredService {
       });
     }
   }
+  getSelect(cols) {
+    const select = { id: true };
+    for (const col of cols) {
+      if (col.canQuery) {
+        if (col.colType === 'SubTable') {
+          select[col.name] = {
+            select: { id: true },
+          };
+        } else {
+          select[col.name] = true;
+        }
+      }
+    }
+    return select;
+  }
+  async getTableRecoredTest(
+    recoredId: string,
+    tableMap: Map<string, any>,
+    tableId: string,
+  ) {
+    let tableConfig: Table & { cols: Col[] };
+    if (tableMap.has(tableId)) {
+      tableConfig = tableMap.get(tableId);
+    } else {
+      tableConfig = await this.getTableConfig(tableId);
+      tableMap.set(tableId, tableConfig);
+    }
+    const entity = await this.getTableEntity(tableConfig.tableName);
+    const rawData = await entity.findUniqueOrThrow({
+      where: { id: recoredId },
+      select: this.getSelect(tableConfig.cols),
+    });
+    return await this.rawDataTransition(rawData, tableMap, tableId);
+  }
+  async rawDataTransition(
+    rawData,
+    tableMap: Map<string, any>,
+    tableId: string,
+  ) {
+    let tableConfig: Table & { cols: Col[] };
+    if (tableMap.has(tableId)) {
+      tableConfig = tableMap.get(tableId);
+    } else {
+      tableConfig = await this.getTableConfig(tableId);
+      tableMap.set(tableId, tableConfig);
+    }
+    const queryCols = tableConfig.cols.filter((col) => col.canQuery);
+    const result = {
+      id: rawData.id,
+    };
+    for (const col of queryCols) {
+      const { name, colType, subTableType, fission } = col;
+      let val = rawData[name];
+      const subTableId = col.subTableId as string;
+      if (colType === 'SubTable') {
+        if (subTableType === 'ToOne') {
+          const subData = await this.getTableRecoredTest(
+            val.id,
+            tableMap,
+            subTableId,
+          );
+          val = await this.rawDataTransition(subData, tableMap, subTableId);
+        } else if (subTableType === 'ToMany') {
+          for (const index in val) {
+            const row = await this.getTableRecoredTest(
+              val[index].id,
+              tableMap,
+              subTableId,
+            );
+            val[index] = await this.rawDataTransition(
+              row,
+              tableMap,
+              subTableId,
+            );
+          }
+        }
+      } else if (colType === 'Enum') {
+      } else {
+      }
 
+      /**
+       * TODO: 实现数据转换
+       */
+      // if (col.transform) {
+      //   val = col.transform(val);
+      // }
+      result[name] = val;
+      if (isArray(fission)) {
+        (fission as any[]).forEach(({ formKey, toKey }) => {
+          const fissionValue = isArray(val)
+            ? val.map((v) => get(v, formKey))
+            : isPlainObject(val)
+            ? get(val, formKey)
+            : undefined;
+          set(result, toKey, fissionValue);
+        });
+      }
+    }
+    return result;
+  }
   async getTableRecored(tableId: string, recoredId: string) {
-    const { tableName, cols } = await this.getTableConfig(tableId);
-    const entity = await this.getTableEntity(tableName);
-    const select = await this.getTableSelectForFind(entity, cols);
-    this.prisma.extraWorkApplication.findUniqueOrThrow({
-      where: { id: recoredId },
-      select: {
-        userId: true,
-      },
-    });
-    return await entity.findUniqueOrThrow({
-      where: { id: recoredId },
-      select: select,
-    });
+    const test = true;
+
+    if (test) {
+      const map = new Map();
+      return await this.getTableRecoredTest(recoredId, map, tableId);
+    } else {
+      const { tableName, cols } = await this.getTableConfig(tableId);
+      const entity = await this.getTableEntity(tableName);
+      const select = await this.getTableSelectForFind(cols);
+      return await entity.findUniqueOrThrow({
+        where: { id: recoredId },
+        select: select,
+      });
+    }
   }
 
   async getTableRecoreds(tableId: string, pageQuery: PaginationQueryType) {
-    const { tableName, cols } = await this.getTableConfig(tableId);
-    const entity = await this.getTableEntity(tableName);
-    const select = await this.getTableSelectForFind(entity, cols);
-    console.log({
-      select,
-    });
-    return await entity.findManyByPagination(pageQuery, {
-      select: select,
-    });
+    const test = true;
+
+    if (test) {
+      const config = await this.getTableConfig(tableId);
+      const map = new Map([[tableId, config]]);
+      const entity = await this.getTableEntity(config.tableName);
+      console.log('select', this.getSelect(config.cols));
+      const { total, rows } = await entity.findManyByPagination(pageQuery, {
+        select: this.getSelect(config.cols),
+      });
+      for (const index in rows) {
+        rows[index] = await this.rawDataTransition(rows[index], map, tableId);
+      }
+      return {
+        total,
+        rows: rows,
+      };
+    } else {
+      const { tableName, cols } = await this.getTableConfig(tableId);
+      const entity = await this.getTableEntity(tableName);
+      const select = await this.getTableSelectForFind(cols);
+      return await entity.findManyByPagination(pageQuery, {
+        select: select,
+      });
+    }
   }
   async delTableRecored(tableId: string, recoredId: string) {
-    // this.prisma.col.create({
-    //   data: {
-    //     name: '',
-    //     colType: 'String',
-    //     tableId: '',
-    //     subTable: {
-    //       connect: { id: 'sdad ' },
-    //     },
-    //   },
-    // });
     const { tableName } = await this.getTableConfig(tableId);
     const entity = await this.getTableEntity(tableName);
     return await entity.delete({ where: { id: recoredId } });
