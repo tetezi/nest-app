@@ -72,6 +72,7 @@ enum ColType {
   Int
   DateTime
   SubTable
+  Enum
 }
 
 enum SubTableType {
@@ -90,21 +91,26 @@ enum SubTableQueryStrategy {
 }
 
 model Col {
-  id                       String                    @id @default(uuid()) @db.VarChar(36)
-  name                     String                    @db.VarChar(50)
-  canWritable              Boolean                   @default(true)
-  canQuery                 Boolean                   @default(true)
-  colType                  ColType
+  id          String  @id @default(uuid()) @db.VarChar(36)
+  name        String  @db.VarChar(50)
+  canWritable Boolean @default(true)
+  canQuery    Boolean @default(true)
+  colType     ColType
+  fission     Json?
+
+  enumCategoryId String? @db.VarChar(36)
+
   subTableType             SubTableType?
   subTableWritableStrategy SubTableWritableStrategy?
   subTableQueryStrategy    SubTableQueryStrategy?
-  description              String?                   @db.VarChar(255)
-  createdAt                DateTime                  @default(now())
-  updatedAt                DateTime                  @updatedAt
-  subTable                 Table?                    @relation("parentSubTableCols", fields: [subTableId], references: [id])
-  subTableId               String?                   @db.VarChar(36)
-  table                    Table                     @relation("tableCols", onDelete: Cascade, fields: [tableId], references: [id])
-  tableId                  String                    @db.VarChar(36)
+
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  subTable    Table?   @relation("parentSubTableCols", fields: [subTableId], references: [id])
+  subTableId  String?  @db.VarChar(36)
+  table       Table    @relation("tableCols", onDelete: Cascade, fields: [tableId], references: [id])
+  tableId     String   @db.VarChar(36)
 }
 
 model DynamicForm {
@@ -131,12 +137,12 @@ enum DynamicFormViewCompFormSourceType {
 }
 
 model DynamicFormViewComp {
-  id          String   @id @default(uuid()) @db.VarChar(36)
-  name        String   @db.VarChar(50)
-  tableColumns     Json
-  description String?  @db.VarChar(255)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  name         String   @db.VarChar(50)
+  tableColumns Json
+  description  String?  @db.VarChar(255)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   dataSourceType DynamicFormViewCompDataSourceType
   //TODO ： 此处仍需添加其他数据源配置，如分页，保存，获取等第三方数据源api
@@ -182,8 +188,29 @@ model ExtraWorkApplication {
   type        ExtraWorkApplicationType
   startTime   DateTime
   endTime     DateTime
-  duration    Int
   description String?                  @db.VarChar(255)
   createdAt   DateTime                 @default(now())
   updatedAt   DateTime                 @updatedAt
+  testId      String?                  @db.VarChar(36)
+}
+
+model EnumCategory {
+  id          String       @id @default(uuid()) @db.VarChar(36)
+  name        String       @unique() @db.VarChar(50)
+  title       String       @db.VarChar(50)
+  details     EnumDetail[] @relation("enumCategoryDetails")
+  description String?      @db.VarChar(255)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model EnumDetail {
+  id          String       @id @default(uuid()) @db.VarChar(36)
+  name        String       @db.VarChar(100)
+  value       String       @db.VarChar(100)
+  description String?      @db.VarChar(255)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  categoryId  String       @db.VarChar(36)
+  category    EnumCategory @relation("enumCategoryDetails", onDelete: Cascade, fields: [categoryId], references: [id])
 }

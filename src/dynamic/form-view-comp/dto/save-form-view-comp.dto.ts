@@ -2,13 +2,16 @@ import {
   DynamicFormViewCompDataSourceType,
   DynamicFormViewCompFormSourceType,
 } from '@prisma/client';
+import { Type } from 'class-transformer';
 import {
   IsOptional,
   IsUUID,
   IsString,
   IsNotEmpty,
   IsEnum,
-  IsJSON,
+  ValidateNested,
+  IsBoolean,
+  IsArray,
 } from 'class-validator';
 
 export class SaveFormViewCompDto {
@@ -20,8 +23,9 @@ export class SaveFormViewCompDto {
   @IsNotEmpty()
   name: string;
 
-  @IsJSON()
-  tableColumns: Record<string, any>[];
+  @Type(() => Object)
+  @IsArray()
+  tableColumns: object[];
 
   @IsEnum(DynamicFormViewCompDataSourceType)
   dataSourceType: DynamicFormViewCompDataSourceType;

@@ -1,5 +1,4 @@
 import {
-  Col,
   ColType,
   SubTableQueryStrategy,
   SubTableType,
@@ -7,7 +6,6 @@ import {
 } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
-  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsEnum,
@@ -37,6 +35,15 @@ export class SaveTableColDto {
 
   @IsEnum(ColType)
   colType: ColType;
+
+  @IsOptional()
+  @Type(() => Object)
+  @IsArray()
+  fission?: object[];
+
+  @IsOptional()
+  @IsUUID('4')
+  enumCategoryId?: string;
 
   @IsEnum(SubTableType)
   @IsOptional()
