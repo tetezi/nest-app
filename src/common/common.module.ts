@@ -13,6 +13,7 @@ import { WrapResponseInterceptor } from './interceptors/wrap-response.intercepto
 import validationOptions from './pipe/validation-options';
 import { ResolvePromisesInterceptor } from './interceptors/resolve-promises';
 import { ErrorInterceptor } from './interceptors/error.interceptor';
+import { DateConversionInterceptor } from './interceptors/date-conversion';
 @Module({
   providers: [
     // {
@@ -26,7 +27,11 @@ import { ErrorInterceptor } from './interceptors/error.interceptor';
       // 全局拦截器，用于解析Promise
       useClass: ResolvePromisesInterceptor,
     },
-
+    {
+      provide: APP_INTERCEPTOR,
+      // 全局拦截器，用于解析日期格式
+      useClass: DateConversionInterceptor,
+    },
     {
       provide: APP_INTERCEPTOR,
       // 全局拦截器，用于包装响应
