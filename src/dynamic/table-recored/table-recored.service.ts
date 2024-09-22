@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TableService } from '../table/table.service';
-import { Col, Table } from '@prisma/client';
+import { DynamicCol, DynamicTable } from '@prisma/client';
 import { PaginationQueryType } from 'src/common/types/pagination-query.type';
 import { isArray, isString } from 'class-validator';
 import { EnumService } from 'src/enum/enum.service';
@@ -16,7 +16,7 @@ export class TableRecoredService {
   async getTableConfig(tableId: string) {
     const table = await this.tableService.getTable(tableId);
     if (!table) {
-      throw new Error('Table not found');
+      throw new Error('DynamicTable not found');
     } else {
       return table;
     }
@@ -29,8 +29,8 @@ export class TableRecoredService {
       throw new Error('Entity not found');
     }
   }
-  async getTableSelectForFind(cols: Col[]) {
-    const getSelect = async (cols: Col[]) => {
+  async getTableSelectForFind(cols: DynamicCol[]) {
+    const getSelect = async (cols: DynamicCol[]) => {
       const reuslt = {
         id: true,
       };
@@ -65,7 +65,7 @@ export class TableRecoredService {
     };
     return await getSelect(cols);
   }
-  async getTableSelectSubsetForSave(cols: Col[], data: any) {
+  async getTableSelectSubsetForSave(cols: DynamicCol[], data: any) {
     const { id } = data;
     const isUpdate = id !== undefined;
     const result: any = {
@@ -223,7 +223,7 @@ export class TableRecoredService {
     tableMap: Map<string, any>,
     tableId: string,
   ) {
-    let tableConfig: Table & { cols: Col[] };
+    let tableConfig: DynamicTable & { cols: DynamicCol[] };
     if (tableMap.has(tableId)) {
       tableConfig = tableMap.get(tableId);
     } else {
@@ -242,7 +242,7 @@ export class TableRecoredService {
     tableMap: Map<string, any>,
     tableId: string,
   ) {
-    let tableConfig: Table & { cols: Col[] };
+    let tableConfig: DynamicTable & { cols: DynamicCol[] };
     if (tableMap.has(tableId)) {
       tableConfig = tableMap.get(tableId);
     } else {
@@ -291,14 +291,25 @@ export class TableRecoredService {
       // }
       result[name] = val;
       if (isArray(fission)) {
-        (fission as any[]).forEach(({ formKey, toKey }) => {
-          const fissionValue = isArray(val)
-            ? val.map((v) => get(v, formKey))
-            : isPlainObject(val)
-            ? get(val, formKey)
-            : undefined;
-          set(result, toKey, fissionValue);
-        });
+        if (colType === 'SubTable') {
+          (fission as any[]).forEach(({ formKey, toKey }) => {
+            const fissionValue = isArray(val)
+              ? val.map((v) => get(v, formKey))
+              : isPlainObject(val)
+              ? get(val, formKey)
+              : undefined;
+            set(result, toKey, fissionValue);
+          });
+        } else if (colType === 'Enum') {
+          const enumDetail = await this.enumsService.checkEnum(
+            col.enumCategoryId,
+            val,
+          );
+          (fission as any[]).forEach(({ formKey, toKey }) => {
+            const fissionValue = get(enumDetail, formKey);
+            set(result, toKey, fissionValue);
+          });
+        }
       }
     }
     return result;
@@ -327,9 +338,13 @@ export class TableRecoredService {
       const config = await this.getTableConfig(tableId);
       const map = new Map([[tableId, config]]);
       const entity = await this.getTableEntity(config.tableName);
-      console.log('select', this.getSelect(config.cols));
+
       const { total, rows } = await entity.findManyByPagination(pageQuery, {
         select: this.getSelect(config.cols),
+        orderBy: {
+          createdAt:
+            'createdAt' in this.prisma.dynamicForm.fields ? 'desc' : undefined,
+        },
       });
       for (const index in rows) {
         rows[index] = await this.rawDataTransition(rows[index], map, tableId);
@@ -342,6 +357,7 @@ export class TableRecoredService {
       const { tableName, cols } = await this.getTableConfig(tableId);
       const entity = await this.getTableEntity(tableName);
       const select = await this.getTableSelectForFind(cols);
+
       return await entity.findManyByPagination(pageQuery, {
         select: select,
       });

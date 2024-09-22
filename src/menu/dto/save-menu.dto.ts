@@ -28,6 +28,10 @@ export class SaveMenuDto {
 
   @IsString()
   @IsOptional()
+  dynamicFormViewId?: string;
+
+  @IsString()
+  @IsOptional()
   url: string;
 
   @IsNumber()

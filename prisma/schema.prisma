@@ -35,38 +35,40 @@ enum MenuType {
   Iframe
   View
   Group
+  DynamicFormView
 }
 
 model Menu {
-  id           String   @id @default(uuid()) @db.VarChar(36)
-  name         String   @unique() @db.VarChar(50)
-  type         MenuType
-  routerPath   String?
-  url          String?
-  sort         Int?
-  isEnabled    Boolean  @default(false)
-  description  String?  @db.VarChar(255)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  roles        Role[]
-  parentMenuId String?
-  parentMenu   Menu?    @relation("parentSubMenu", fields: [parentMenuId], references: [id])
-  subMenus     Menu[]   @relation("parentSubMenu")
+  id                String   @id @default(uuid()) @db.VarChar(36)
+  name              String   @unique() @db.VarChar(50)
+  type              MenuType
+  routerPath        String?
+  url               String?
+  sort              Int?
+  dynamicFormViewId String?  @db.VarChar(36)
+  isEnabled         Boolean  @default(false)
+  description       String?  @db.VarChar(255)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  roles             Role[]
+  parentMenuId      String?
+  parentMenu        Menu?    @relation("parentSubMenu", fields: [parentMenuId], references: [id])
+  subMenus          Menu[]   @relation("parentSubMenu")
 }
 
-model Table {
+model DynamicTable {
   id                  String                @id @default(uuid()) @db.VarChar(36)
   name                String                @unique() @db.VarChar(50)
   tableName           String                @db.VarChar(50)
   description         String?               @db.VarChar(255)
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
-  cols                Col[]                 @relation("tableCols")
-  parentCols          Col[]                 @relation("parentSubTableCols")
+  cols                DynamicCol[]                 @relation("tableCols")
+  parentCols          DynamicCol[]                 @relation("parentSubTableCols")
   dynamicFormViewComp DynamicFormViewComp[] @relation("dynamicFormViewCompTable")
 }
 
-enum ColType {
+enum DynamicColType {
   String
   Boolean
   Int
@@ -90,12 +92,12 @@ enum SubTableQueryStrategy {
   PartialObject
 }
 
-model Col {
+model DynamicCol {
   id          String  @id @default(uuid()) @db.VarChar(36)
   name        String  @db.VarChar(50)
   canWritable Boolean @default(true)
   canQuery    Boolean @default(true)
-  colType     ColType
+  colType     DynamicColType
   fission     Json?
 
   enumCategoryId String? @db.VarChar(36)
@@ -107,9 +109,9 @@ model Col {
   description String?  @db.VarChar(255)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  subTable    Table?   @relation("parentSubTableCols", fields: [subTableId], references: [id])
+  subTable    DynamicTable?   @relation("parentSubTableCols", fields: [subTableId], references: [id])
   subTableId  String?  @db.VarChar(36)
-  table       Table    @relation("tableCols", onDelete: Cascade, fields: [tableId], references: [id])
+  table       DynamicTable    @relation("tableCols", onDelete: Cascade, fields: [tableId], references: [id])
   tableId     String   @db.VarChar(36)
 }
 
@@ -146,28 +148,13 @@ model DynamicFormViewComp {
 
   dataSourceType DynamicFormViewCompDataSourceType
   //TODO ： 此处仍需添加其他数据源配置，如分页，保存，获取等第三方数据源api
-  dynamicTable   Table?                            @relation("dynamicFormViewCompTable", fields: [dynamicTableId], references: [id])
+  dynamicTable   DynamicTable?                            @relation("dynamicFormViewCompTable", fields: [dynamicTableId], references: [id])
   dynamicTableId String?
   //TODO ： 此处仍需添加其他表单，如、第三方url，通过传入初始化数据及提交接口，实现表单获取保存
   formSourceType DynamicFormViewCompFormSourceType
   dynamicForm    DynamicForm?                      @relation("dynamicFormViewCompForm", fields: [dynamicFormId], references: [id])
   dynamicFormId  String?
 }
-
-// model DynamicFormSchemas {
-//   id             String               @id @default(uuid()) @db.VarChar(36)
-//   name           String               @db.VarChar(50)
-//   category       String
-//   component      String
-//   description    String?              @db.VarChar(255)
-//   createdAt      DateTime             @default(now())
-//   updatedAt      DateTime             @updatedAt
-//   children       DynamicFormSchemas[] @relation("parentChildrenSchemas")
-//   parentSchema   DynamicFormSchemas?  @relation("parentChildrenSchemas", onDelete: Cascade, fields: [parentSchemaId], references: [id])
-//   parentSchemaId String 
-//   dynamicForm   DynamicForm @relation("dynamicFormSchemas", onDelete: Cascade, fields: [dynamicFormId], references: [id])
-//   dynamicFormId String      @db.VarChar(36)
-// }
 
 enum ExtraWorkApplicationType {
   // 常规加班 

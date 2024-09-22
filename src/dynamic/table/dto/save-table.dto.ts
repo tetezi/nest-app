@@ -1,5 +1,5 @@
 import {
-  ColType,
+  DynamicColType,
   SubTableQueryStrategy,
   SubTableType,
   SubTableWritableStrategy,
@@ -33,8 +33,8 @@ export class SaveTableColDto {
   @IsBoolean()
   canQuery?: boolean;
 
-  @IsEnum(ColType)
-  colType: ColType;
+  @IsEnum(DynamicColType)
+  colType: DynamicColType;
 
   @IsOptional()
   @Type(() => Object)
