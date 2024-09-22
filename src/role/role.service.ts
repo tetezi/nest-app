@@ -30,6 +30,11 @@ export class RoleService {
   async getRoles(paginationQuery: PaginationQueryType) {
     return await this.prisma.extendsService.role.findManyByPagination(
       paginationQuery,
+      {
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
     );
   }
 

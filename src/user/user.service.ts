@@ -33,6 +33,9 @@ export class UserService {
           email: true,
           phone: true,
         },
+        orderBy: {
+          createdAt: 'asc',
+        },
       },
     );
   }

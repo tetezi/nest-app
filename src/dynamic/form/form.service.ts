@@ -17,6 +17,9 @@ export class FormService {
   async getForms(paginationQueryDto: PaginationQueryType) {
     return this.prisma.extendsService.dynamicForm.findManyByPagination(
       paginationQueryDto,
+      {
+        orderBy: { createdAt: 'desc' },
+      },
     );
   }
 

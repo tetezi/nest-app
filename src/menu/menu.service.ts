@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SaveMenuDto } from './dto/save-menu.dto';
+import { isEmpty } from 'loadsh';
 
 @Injectable()
 export class MenuService {
   constructor(private prisma: PrismaService) {}
   async saveMenu(saveMenuDto: SaveMenuDto) {
+    if (
+      saveMenuDto.type === 'DynamicFormView' &&
+      isEmpty(saveMenuDto.dynamicFormViewId)
+    ) {
+      throw new Error('Menu type and dynamicFormViewId cannot be empty');
+    }
     return await this.prisma.menu.upsert({
       where: { id: saveMenuDto.id || '' },
       update: saveMenuDto,
@@ -16,7 +23,13 @@ export class MenuService {
     const getSubMenus = async ({ id }: { id: string }) => {
       const menu = await this.prisma.menu.findUnique({
         where: { id },
-        include: { subMenus: true },
+        include: {
+          subMenus: {
+            orderBy: {
+              sort: 'asc',
+            },
+          },
+        },
       });
       if (menu === null) {
         throw new Error('Menu not found');
@@ -32,6 +45,9 @@ export class MenuService {
         parentMenuId: null,
       },
       select: { id: true },
+      orderBy: {
+        sort: 'asc',
+      },
     });
     return await Promise.all(rootMenus.map(getSubMenus));
   }

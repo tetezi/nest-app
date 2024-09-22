@@ -39,7 +39,7 @@ export class TableService {
       const oldCols = cols.filter(({ id }) => id !== undefined);
       const newCols = cols.filter(({ id }) => id === undefined);
 
-      return await this.prisma.table.update({
+      return await this.prisma.dynamicTable.update({
         where: { id: id },
         data: {
           ...tableData,
@@ -58,7 +58,7 @@ export class TableService {
         },
       });
     } else {
-      return await this.prisma.table.create({
+      return await this.prisma.dynamicTable.create({
         data: {
           ...tableData,
           cols: {
@@ -70,9 +70,10 @@ export class TableService {
   }
 
   async getTables(paginationQueryDto: PaginationQueryType) {
-    return this.prisma.extendsService.table.findManyByPagination(
+    return this.prisma.extendsService.dynamicTable.findManyByPagination(
       paginationQueryDto,
       {
+        orderBy: { createdAt: 'desc' },
         include: {
           cols: {
             select: {
@@ -87,14 +88,14 @@ export class TableService {
   }
 
   async getTable(id: string) {
-    return this.prisma.table.findUnique({
+    return this.prisma.dynamicTable.findUnique({
       where: { id },
       include: { cols: true },
     });
   }
 
   async delTable(id: string) {
-    return await this.prisma.table.delete({
+    return await this.prisma.dynamicTable.delete({
       where: {
         id: id,
       },

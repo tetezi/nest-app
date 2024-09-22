@@ -48,7 +48,10 @@ export class FormViewCompService {
   async getFormViewComps(paginationQueryDto: PaginationQueryType) {
     return this.prisma.extendsService.dynamicFormViewComp.findManyByPagination(
       paginationQueryDto,
-      { include: { dynamicForm: true, dynamicTable: true } },
+      {
+        include: { dynamicForm: true, dynamicTable: true },
+        orderBy: { createdAt: 'desc' },
+      },
     );
   }
 

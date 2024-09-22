@@ -59,6 +59,9 @@ export class EnumService {
         include: {
           details: true,
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
       },
     );
   }
@@ -69,6 +72,9 @@ export class EnumService {
       {
         include: {
           category: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
         },
       },
     );
@@ -87,9 +93,9 @@ export class EnumService {
       },
     });
   }
-  async checkEnum(enumCategoryId: string, valueOrName: string) {
+  async checkEnum(enumCategoryId: string | null, valueOrName: string) {
     const enumCategory = await this.prisma.enumCategory.findUnique({
-      where: { id: enumCategoryId },
+      where: { id: enumCategoryId || '' },
       include: { details: true },
     });
     if (enumCategory) {
