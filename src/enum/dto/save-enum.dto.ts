@@ -1,16 +1,5 @@
-import {
-  Col,
-  ColType,
-  SubTableQueryStrategy,
-  SubTableType,
-  SubTableWritableStrategy,
-} from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
-  ArrayMinSize,
-  IsArray,
-  IsBoolean,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
