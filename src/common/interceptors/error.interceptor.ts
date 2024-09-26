@@ -39,6 +39,15 @@ export class ErrorInterceptor implements NestInterceptor {
               }),
           );
         }
+        if (error instanceof Error) {
+          return throwError(
+            () =>
+              new InternalServerErrorException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: error.message,
+              }),
+          );
+        }
         // 对于其他未知类型的错误，抛出 InternalServerErrorException
         /**
          *  TODO: 以后再搞个错误日志的插件
@@ -49,7 +58,7 @@ export class ErrorInterceptor implements NestInterceptor {
             new InternalServerErrorException({
               statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
               message: 'Internal Server Error',
-              error,
+              error: error,
             }),
         );
       }),
