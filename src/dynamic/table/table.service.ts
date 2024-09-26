@@ -87,9 +87,11 @@ export class TableService {
     );
   }
 
-  async getTable(id: string) {
-    return this.prisma.dynamicTable.findUnique({
-      where: { id },
+  async getTable(idOrName: string) {
+    return await this.prisma.dynamicTable.findFirst({
+      where: {
+        OR: [{ id: idOrName }, { name: idOrName }],
+      },
       include: { cols: true },
     });
   }

@@ -13,8 +13,8 @@ export class TableRecoredService {
     private enumsService: EnumService,
     private tableService: TableService,
   ) {}
-  async getTableConfig(tableId: string) {
-    const table = await this.tableService.getTable(tableId);
+  async getTableConfig(tableIdOrName: string) {
+    const table = await this.tableService.getTable(tableIdOrName);
     if (!table) {
       throw new Error('DynamicTable not found');
     } else {
@@ -186,9 +186,9 @@ export class TableRecoredService {
     }
     return result;
   }
-  async saveTableRecored(tableId: string, recoredData: { id?: string }) {
+  async saveTableRecored(tableIdOrName: string, recoredData: { id?: string }) {
     const { id } = recoredData;
-    const { tableName, cols } = await this.getTableConfig(tableId);
+    const { tableName, cols } = await this.getTableConfig(tableIdOrName);
     const entity = await this.getTableEntity(tableName);
     const data = await this.getTableSelectSubsetForSave(cols, recoredData);
 
@@ -221,33 +221,33 @@ export class TableRecoredService {
   async getTableRecoredTest(
     recoredId: string,
     tableMap: Map<string, any>,
-    tableId: string,
+    tableIdOrName: string,
   ) {
     let tableConfig: DynamicTable & { cols: DynamicCol[] };
-    if (tableMap.has(tableId)) {
-      tableConfig = tableMap.get(tableId);
+    if (tableMap.has(tableIdOrName)) {
+      tableConfig = tableMap.get(tableIdOrName);
     } else {
-      tableConfig = await this.getTableConfig(tableId);
-      tableMap.set(tableId, tableConfig);
+      tableConfig = await this.getTableConfig(tableIdOrName);
+      tableMap.set(tableIdOrName, tableConfig);
     }
     const entity = await this.getTableEntity(tableConfig.tableName);
     const rawData = await entity.findUniqueOrThrow({
       where: { id: recoredId },
       select: this.getSelect(tableConfig.cols),
     });
-    return await this.rawDataTransition(rawData, tableMap, tableId);
+    return await this.rawDataTransition(rawData, tableMap, tableIdOrName);
   }
   async rawDataTransition(
     rawData,
     tableMap: Map<string, any>,
-    tableId: string,
+    tableIdOrName: string,
   ) {
     let tableConfig: DynamicTable & { cols: DynamicCol[] };
-    if (tableMap.has(tableId)) {
-      tableConfig = tableMap.get(tableId);
+    if (tableMap.has(tableIdOrName)) {
+      tableConfig = tableMap.get(tableIdOrName);
     } else {
-      tableConfig = await this.getTableConfig(tableId);
-      tableMap.set(tableId, tableConfig);
+      tableConfig = await this.getTableConfig(tableIdOrName);
+      tableMap.set(tableIdOrName, tableConfig);
     }
     const queryCols = tableConfig.cols.filter((col) => col.canQuery);
     const result = {
@@ -314,14 +314,14 @@ export class TableRecoredService {
     }
     return result;
   }
-  async getTableRecored(tableId: string, recoredId: string) {
+  async getTableRecored(tableIdOrName: string, recoredId: string) {
     const test = true;
 
     if (test) {
       const map = new Map();
-      return await this.getTableRecoredTest(recoredId, map, tableId);
+      return await this.getTableRecoredTest(recoredId, map, tableIdOrName);
     } else {
-      const { tableName, cols } = await this.getTableConfig(tableId);
+      const { tableName, cols } = await this.getTableConfig(tableIdOrName);
       const entity = await this.getTableEntity(tableName);
       const select = await this.getTableSelectForFind(cols);
       return await entity.findUniqueOrThrow({
@@ -331,30 +331,43 @@ export class TableRecoredService {
     }
   }
 
-  async getTableRecoreds(tableId: string, pageQuery: PaginationQueryType) {
+  async getTableRecoreds(
+    tableIdOrName: string,
+    pageQuery: PaginationQueryType,
+  ) {
     const test = true;
 
     if (test) {
-      const config = await this.getTableConfig(tableId);
-      const map = new Map([[tableId, config]]);
+      const config = await this.getTableConfig(tableIdOrName);
+      const map = new Map([[tableIdOrName, config]]);
       const entity = await this.getTableEntity(config.tableName);
 
-      const { total, rows } = await entity.findManyByPagination(pageQuery, {
+      const data = await entity.findManyByPagination(pageQuery, {
         select: this.getSelect(config.cols),
         orderBy: {
           createdAt:
             'createdAt' in this.prisma.dynamicForm.fields ? 'desc' : undefined,
         },
       });
+      const rows = pageQuery ? data.rows : data;
+      const total = pageQuery ? data.total : data.length;
       for (const index in rows) {
-        rows[index] = await this.rawDataTransition(rows[index], map, tableId);
+        rows[index] = await this.rawDataTransition(
+          rows[index],
+          map,
+          tableIdOrName,
+        );
       }
-      return {
-        total,
-        rows: rows,
-      };
+      if (pageQuery) {
+        return {
+          total: total,
+          rows: rows,
+        };
+      } else {
+        return rows;
+      }
     } else {
-      const { tableName, cols } = await this.getTableConfig(tableId);
+      const { tableName, cols } = await this.getTableConfig(tableIdOrName);
       const entity = await this.getTableEntity(tableName);
       const select = await this.getTableSelectForFind(cols);
 
@@ -363,8 +376,8 @@ export class TableRecoredService {
       });
     }
   }
-  async delTableRecored(tableId: string, recoredId: string) {
-    const { tableName } = await this.getTableConfig(tableId);
+  async delTableRecored(tableIdOrName: string, recoredId: string) {
+    const { tableName } = await this.getTableConfig(tableIdOrName);
     const entity = await this.getTableEntity(tableName);
     return await entity.delete({ where: { id: recoredId } });
   }

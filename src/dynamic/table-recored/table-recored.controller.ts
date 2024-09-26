@@ -12,10 +12,11 @@ export class TableRecoredController {
   @Post('saveTableRecored')
   saveTableRecored(
     @Query('tableId') tableId: string,
+    @Query('tableName') tableName: string,
     @Body() saveTableRecoredDto,
   ) {
     return this.tableRecoredService.saveTableRecored(
-      tableId,
+      tableId || tableName,
       saveTableRecoredDto,
     );
   }
@@ -23,17 +24,29 @@ export class TableRecoredController {
   @Get('getTableRecoreds')
   getTgetTableRecoredsables(
     @Query('tableId') tableId: string,
+    @Query('tableName') tableName: string,
     @Query(PaginationQueryPipe) page: PaginationQueryType,
   ) {
-    return this.tableRecoredService.getTableRecoreds(tableId, page);
+    return this.tableRecoredService.getTableRecoreds(
+      tableId || tableName,
+      page,
+    );
   }
 
   @Get('getTableRecored')
-  getTableRecored(@Query('tableId') tableId: string, @Query('id') id: string) {
-    return this.tableRecoredService.getTableRecored(tableId, id);
+  getTableRecored(
+    @Query('tableId') tableId: string,
+    @Query('tableName') tableName: string,
+    @Query('id') id: string,
+  ) {
+    return this.tableRecoredService.getTableRecored(tableId || tableName, id);
   }
   @Post('delTableRecored')
-  delTableRecored(@Body('tableId') tableId: string, @Body('id') id: string) {
-    return this.tableRecoredService.delTableRecored(tableId, id);
+  delTableRecored(
+    @Body('tableId') tableId: string,
+    @Body('tableName') tableName: string,
+    @Body('id') id: string,
+  ) {
+    return this.tableRecoredService.delTableRecored(tableId || tableName, id);
   }
 }
