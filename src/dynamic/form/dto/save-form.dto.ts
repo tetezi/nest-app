@@ -1,3 +1,4 @@
+import { DynamicFormLabelPosition } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   IsOptional,
@@ -5,6 +6,7 @@ import {
   IsString,
   IsNotEmpty,
   IsArray,
+  IsEnum,
 } from 'class-validator';
 export class SaveFormDto {
   @IsOptional()
@@ -14,6 +16,10 @@ export class SaveFormDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsEnum(DynamicFormLabelPosition)
+  @IsOptional()
+  labelPosition?: DynamicFormLabelPosition;
 
   @IsString()
   @IsOptional()
