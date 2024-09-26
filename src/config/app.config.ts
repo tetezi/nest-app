@@ -27,7 +27,6 @@ export type AppConfig = {
   nodeEnv: string;
   workingDirectory: string;
   port: number;
-  apiPrefix: string;
 };
 
 export const appConfigFactory = registerAs<AppConfig>('app', () => {
@@ -37,6 +36,5 @@ export const appConfigFactory = registerAs<AppConfig>('app', () => {
     nodeEnv: env.NODE_ENV || 'development',
     workingDirectory: process.env.PWD || process.cwd(),
     port: env.APP_PORT || 3000,
-    apiPrefix: env.API_PREFIX || 'api',
   };
 });
