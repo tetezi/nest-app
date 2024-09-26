@@ -19,6 +19,8 @@ model User {
   updatedAt             DateTime               @updatedAt
   roles                 Role[]
   extraWorkApplications ExtraWorkApplication[] @relation("userExtraWorkApplications")
+
+  @@map("user")
 }
 
 model Role {
@@ -29,6 +31,8 @@ model Role {
   updatedAt   DateTime @updatedAt
   users       User[]
   menus       Menu[]
+
+  @@map("role")
 }
 
 enum MenuType {
@@ -54,6 +58,8 @@ model Menu {
   parentMenuId      String?
   parentMenu        Menu?    @relation("parentSubMenu", fields: [parentMenuId], references: [id])
   subMenus          Menu[]   @relation("parentSubMenu")
+
+  @@map("menu")
 }
 
 model DynamicTable {
@@ -63,9 +69,11 @@ model DynamicTable {
   description         String?               @db.VarChar(255)
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
-  cols                DynamicCol[]                 @relation("tableCols")
-  parentCols          DynamicCol[]                 @relation("parentSubTableCols")
+  cols                DynamicCol[]          @relation("tableCols")
+  parentCols          DynamicCol[]          @relation("parentSubTableCols")
   dynamicFormViewComp DynamicFormViewComp[] @relation("dynamicFormViewCompTable")
+
+  @@map("dynamic_table")
 }
 
 enum DynamicColType {
@@ -93,10 +101,10 @@ enum SubTableQueryStrategy {
 }
 
 model DynamicCol {
-  id          String  @id @default(uuid()) @db.VarChar(36)
-  name        String  @db.VarChar(50)
-  canWritable Boolean @default(true)
-  canQuery    Boolean @default(true)
+  id          String         @id @default(uuid()) @db.VarChar(36)
+  name        String         @db.VarChar(50)
+  canWritable Boolean        @default(true)
+  canQuery    Boolean        @default(true)
   colType     DynamicColType
   fission     Json?
 
@@ -106,26 +114,37 @@ model DynamicCol {
   subTableWritableStrategy SubTableWritableStrategy?
   subTableQueryStrategy    SubTableQueryStrategy?
 
-  description String?  @db.VarChar(255)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  subTable    DynamicTable?   @relation("parentSubTableCols", fields: [subTableId], references: [id])
-  subTableId  String?  @db.VarChar(36)
-  table       DynamicTable    @relation("tableCols", onDelete: Cascade, fields: [tableId], references: [id])
-  tableId     String   @db.VarChar(36)
+  description String?       @db.VarChar(255)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  subTable    DynamicTable? @relation("parentSubTableCols", fields: [subTableId], references: [id])
+  subTableId  String?       @db.VarChar(36)
+  table       DynamicTable  @relation("tableCols", onDelete: Cascade, fields: [tableId], references: [id])
+  tableId     String        @db.VarChar(36)
+
+  @@map("dynamic_col")
+}
+
+enum DynamicFormLabelPosition {
+  left
+  right
+  top
 }
 
 model DynamicForm {
-  id                  String                @id @default(uuid()) @db.VarChar(36)
-  name                String                @db.VarChar(50)
-  beforeSubmit        String?               @db.VarChar(255)
-  defaultValue        String?               @db.VarChar(255)
+  id                  String                    @id @default(uuid()) @db.VarChar(36)
+  name                String                    @db.VarChar(50)
+  labelPosition       DynamicFormLabelPosition?
+  beforeSubmit        String?                   @db.VarChar(255)
+  defaultValue        String?                   @db.VarChar(255)
   // dynamicFormSchemas DynamicFormSchemas[] @relation("dynamicFormSchemas")
   schemas             Json
-  description         String?               @db.VarChar(255)
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  dynamicFormViewComp DynamicFormViewComp[] @relation("dynamicFormViewCompForm")
+  description         String?                   @db.VarChar(255)
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  dynamicFormViewComp DynamicFormViewComp[]     @relation("dynamicFormViewCompForm")
+
+  @@map("dynamic_form")
 }
 
 enum DynamicFormViewCompDataSourceType {
@@ -148,12 +167,14 @@ model DynamicFormViewComp {
 
   dataSourceType DynamicFormViewCompDataSourceType
   //TODO ： 此处仍需添加其他数据源配置，如分页，保存，获取等第三方数据源api
-  dynamicTable   DynamicTable?                            @relation("dynamicFormViewCompTable", fields: [dynamicTableId], references: [id])
+  dynamicTable   DynamicTable?                     @relation("dynamicFormViewCompTable", fields: [dynamicTableId], references: [id])
   dynamicTableId String?
   //TODO ： 此处仍需添加其他表单，如、第三方url，通过传入初始化数据及提交接口，实现表单获取保存
   formSourceType DynamicFormViewCompFormSourceType
   dynamicForm    DynamicForm?                      @relation("dynamicFormViewCompForm", fields: [dynamicFormId], references: [id])
   dynamicFormId  String?
+
+  @@map("dynamic_form_view_comp")
 }
 
 enum ExtraWorkApplicationType {
@@ -179,6 +200,8 @@ model ExtraWorkApplication {
   createdAt   DateTime                 @default(now())
   updatedAt   DateTime                 @updatedAt
   testId      String?                  @db.VarChar(36)
+
+  @@map("extra_work_application")
 }
 
 model EnumCategory {
@@ -189,6 +212,8 @@ model EnumCategory {
   description String?      @db.VarChar(255)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
+  @@map("enum_category")
 }
 
 model EnumDetail {
@@ -200,4 +225,18 @@ model EnumDetail {
   updatedAt   DateTime     @updatedAt
   categoryId  String       @db.VarChar(36)
   category    EnumCategory @relation("enumCategoryDetails", onDelete: Cascade, fields: [categoryId], references: [id])
+
+  @@map("enum_detail")
+}
+
+model TextCollection {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  text        String   @db.VarChar(250)
+  author      String?  @db.VarChar(50)
+  source      String?  @db.VarChar(50)
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("text_collection")
 }
