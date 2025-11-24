@@ -1,3 +1,11 @@
+/*
+ * @Author: tetezi MaHouShouJoTetezi@foxmail.com
+ * @Date: 2024-07-08 14:17:41
+ * @LastEditors: tetezi MaHouShouJoTetezi@foxmail.com
+ * @LastEditTime: 2025-11-20 23:53:26
+ * @FilePath: \nest-app\src\common\common.module.ts
+ * @Description:
+ */
 import {
   MiddlewareConsumer,
   Module,
@@ -6,15 +14,18 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { LoggingMiddleware } from './middleware/logging.middleware';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { ApiKeyGuard } from './guards/api-key.guard';
+import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { PostGuard } from './guards/post.guard';
 import { TimeoutInterceptor } from './interceptors/timeout.interceptor';
 import { WrapResponseInterceptor } from './interceptors/wrap-response.interceptor';
 import validationOptions from './pipe/validation-options';
 import { ResolvePromisesInterceptor } from './interceptors/resolve-promises';
 import { ErrorInterceptor } from './interceptors/error.interceptor';
 import { DateConversionInterceptor } from './interceptors/date-conversion';
+import { JwtAuthGuard } from './guards/jwt.guard';
+import { UserModule } from 'src/user/user.module';
 @Module({
+  imports: [UserModule],
   providers: [
     // {
     //   provide: APP_GUARD,
@@ -22,6 +33,15 @@ import { DateConversionInterceptor } from './interceptors/date-conversion';
     //   useClass: ApiKeyGuard,
     // },
     // { provide: APP_FILTER, useClass: PrismaClientExceptionFilter },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      // 全局API密钥守卫，用于验证API请求
+      useClass: PostGuard,
+    },
     {
       provide: APP_INTERCEPTOR,
       // 全局拦截器，用于解析Promise
