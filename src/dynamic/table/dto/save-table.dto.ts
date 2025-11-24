@@ -41,6 +41,10 @@ export class SaveTableColDto {
   @IsArray()
   fission?: object[];
 
+  @IsString()
+  @IsOptional()
+  transform?: string;
+
   @IsOptional()
   @IsUUID('4')
   enumCategoryId?: string;

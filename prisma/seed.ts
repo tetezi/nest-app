@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { EnumCategory, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 /**
@@ -13,23 +13,24 @@ async function initEnum() {
         create: [
           {
             name: '常规加班',
-            value: 'Regular',
+            value: '1',
           },
           {
             name: '节假日加班',
-            value: 'Holiday',
+            value: '2',
           },
           {
             name: '紧急加班',
-            value: 'Emergency',
+            value: '3',
           },
           {
             name: '调休加班',
-            value: 'Compensatory',
+            value: '4',
           },
         ],
       },
     },
+    include: { details: true },
   });
   return {
     extraWorkApplicationTypeEnum,
@@ -184,22 +185,20 @@ async function initMenu({
 /**
  * 初始化角色表
  */
-async function initRole(testUser, employeeMenu) {
+async function initRole(testUserId: string) {
+  const allMenus = await prisma.menu.findMany();
   /**
    * 创建测试角色并关联测试账号
    */
   const testRole = await prisma.role.create({
     data: {
-      name: '员工',
+      name: '测试角色',
       description: '通用权限角色',
       users: {
-        connect: { id: testUser.id },
+        connect: { id: testUserId },
       },
       menus: {
-        connect: [
-          { id: employeeMenu.id },
-          ...employeeMenu.subMenus.map((subMenu) => ({ id: subMenu.id })),
-        ],
+        connect: allMenus.map((menu) => ({ id: menu.id })),
       },
     },
   });
@@ -566,13 +565,13 @@ async function initDynamicTable(extraWorkApplicationTypeEnum) {
           {
             name: 'author',
             colType: 'String',
-            canQuery: true,
+            canQuery: false,
             canWritable: true,
           },
           {
             name: 'source',
             colType: 'String',
-            canQuery: true,
+            canQuery: false,
             canWritable: true,
           },
           {
@@ -584,19 +583,19 @@ async function initDynamicTable(extraWorkApplicationTypeEnum) {
           {
             name: 'description',
             colType: 'String',
-            canQuery: true,
+            canQuery: false,
             canWritable: true,
           },
           {
             name: 'createdAt',
             colType: 'DateTime',
-            canQuery: true,
+            canQuery: false,
             canWritable: false,
           },
           {
             name: 'updatedAt',
             colType: 'DateTime',
-            canQuery: true,
+            canQuery: false,
             canWritable: false,
           },
         ],
@@ -634,7 +633,7 @@ async function initDynamicFormView(
             showOverflowTooltip: false,
           },
           {
-            prop: 'typeName',
+            prop: 'type_desc',
             label: '类型',
             width: '',
             transform: '',
@@ -698,48 +697,13 @@ async function initDynamicFormView(
             transform: '',
             showOverflowTooltip: false,
           },
-          {
-            prop: 'author',
-            label: '角色',
-            width: '',
-            transform: '',
-            showOverflowTooltip: false,
-          },
-          {
-            prop: 'source',
-            label: '出处',
-            width: '',
-            transform: '',
-            showOverflowTooltip: false,
-          },
-          {
-            prop: 'description',
-            label: '备注',
-            width: '',
-            transform: '',
-            showOverflowTooltip: false,
-          },
-          {
-            prop: 'createdAt',
-            label: '创建时间',
-            width: '',
-            transform: '',
-            showOverflowTooltip: false,
-          },
-          {
-            prop: 'updatedAt',
-            label: '编辑时间',
-            width: '',
-            transform: '',
-            showOverflowTooltip: false,
-          },
         ],
       },
     },
   );
   return { extraWorkApplicationDynamicFormView, textCollectionDynamicFormView };
 }
-async function initDynamicTableRecored() {
+async function initDynamicTableRecored(testUserId: string) {
   await prisma.textCollection.createMany({
     data: [
       {
@@ -752,7 +716,7 @@ async function initDynamicTableRecored() {
         author: '罗曼·罗兰',
       },
       {
-        text: '我认为教育小孩子”世界上没有黑暗“是一件非常糟糕的事情',
+        text: '我认为教育小孩子“世界上没有黑暗”是一件非常糟糕的事情',
         author: '虚渊玄',
       },
       {
@@ -806,38 +770,42 @@ async function initDynamicTableRecored() {
         text: '拥抱过去，创造未来',
       },
       {
-        source: '阿里云',
-        text: '为了无法计算的价值',
-      },
-      {
         source: '人狼村之谜',
         text: '即便如此，也要追求狼的胜利',
         author: '房石阳明',
       },
     ],
   });
+
+  await prisma.extraWorkApplication.createMany({
+    data: [
+      {
+        userId: testUserId,
+        type: '1',
+        startTime: new Date('2025-11-01').toISOString(),
+        endTime: new Date('2025-11-08').toISOString(),
+      },
+    ],
+  });
 }
 async function main() {
-  const { testUser, adminUser } = await initUser();
+  const { testUser } = await initUser();
   const { extraWorkApplicationTypeEnum } = await initEnum();
   const { extraWorkApplicationDynamicForm, textCollectionDynamicForm } =
     await initDynamicForm();
-  const {
-    userDynamicTable,
-    extraWorkApplicationDynamicTable,
-    textCollectionDynamicTable,
-  } = await initDynamicTable(extraWorkApplicationTypeEnum);
+  const { extraWorkApplicationDynamicTable, textCollectionDynamicTable } =
+    await initDynamicTable(extraWorkApplicationTypeEnum);
   const { extraWorkApplicationDynamicFormView, textCollectionDynamicFormView } =
     await initDynamicFormView(
       { extraWorkApplicationDynamicTable, textCollectionDynamicTable },
       { extraWorkApplicationDynamicForm, textCollectionDynamicForm },
     );
-  const { employeeMenu } = await initMenu({
+  await initMenu({
     extraWorkApplicationDynamicFormView,
     textCollectionDynamicFormView,
   });
-  const { testRole } = await initRole(testUser, employeeMenu);
-  await initDynamicTableRecored();
+  await initRole(testUser.id);
+  await initDynamicTableRecored(testUser.id);
 }
 
 main()

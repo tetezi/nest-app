@@ -107,6 +107,7 @@ model DynamicCol {
   canQuery    Boolean        @default(true)
   colType     DynamicColType
   fission     Json?
+  transform String? @db.VarChar(255)
 
   enumCategoryId String? @db.VarChar(36)
 
@@ -177,29 +178,17 @@ model DynamicFormViewComp {
   @@map("dynamic_form_view_comp")
 }
 
-enum ExtraWorkApplicationType {
-  // 常规加班 
-  Regular
-  // 节假日加班
-  Holiday
-  // 紧急加班
-  Emergency
-  // 调休加班
-  Compensatory
-}
-
 //TODO:加创建人修改人字段
 model ExtraWorkApplication {
-  id          String                   @id @default(uuid()) @db.VarChar(36)
-  userId      String                   @db.VarChar(36)
-  user        User?                    @relation("userExtraWorkApplications", fields: [userId], references: [id])
-  type        ExtraWorkApplicationType
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  userId      String   @db.VarChar(36)
+  user        User?    @relation("userExtraWorkApplications", fields: [userId], references: [id])
+  type        String
   startTime   DateTime
   endTime     DateTime
-  description String?                  @db.VarChar(255)
-  createdAt   DateTime                 @default(now())
-  updatedAt   DateTime                 @updatedAt
-  testId      String?                  @db.VarChar(36)
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("extra_work_application")
 }

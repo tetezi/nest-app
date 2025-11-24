@@ -9,12 +9,12 @@ import { RoleModule } from './role/role.module';
 import { MenuModule } from './menu/menu.module';
 import { DynamicModule } from './dynamic/dynamic.module';
 import { EnumModule } from './enum/enum.module';
-
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: allConfigFactory,
       isGlobal: true,
+      cache: true,
     }),
     PrismaModule,
     AuthModule,

@@ -7,7 +7,7 @@ import { AllConfigType } from 'src/config';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RoleService } from 'src/role/role.service';
-import { Menu } from '@prisma/client';
+import { Menu, User } from '@prisma/client';
 import { MenuService } from 'src/menu/menu.service';
 
 @Injectable()
@@ -34,7 +34,7 @@ export class AuthService {
     if (!isValidPassword) {
       throw new Error('Invalid password');
     }
-    const { token: accessToken } = await this.getToken(user.id);
+    const { token: accessToken } = await this.getToken(user);
     return {
       accessToken,
       user,
@@ -43,14 +43,14 @@ export class AuthService {
   /**
    * TODO: 添加RefreshToken的功能
    */
-  private async getToken(userId: string) {
+  private async getToken(user: User) {
     const tokenExpiresIn = this.configService.getOrThrow('auth.expires', {
       infer: true,
     });
 
     const token = await this.jwtService.signAsync(
       {
-        userId: userId,
+        userId: user.id,
       },
       {
         secret: this.configService.getOrThrow('auth.secret', { infer: true }),

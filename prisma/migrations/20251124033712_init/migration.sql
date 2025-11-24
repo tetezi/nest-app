@@ -83,6 +83,7 @@ CREATE TABLE `dynamic_col` (
 CREATE TABLE `dynamic_form` (
     `id` VARCHAR(36) NOT NULL,
     `name` VARCHAR(50) NOT NULL,
+    `labelPosition` ENUM('left', 'right', 'top') NULL,
     `beforeSubmit` VARCHAR(255) NULL,
     `defaultValue` VARCHAR(255) NULL,
     `schemas` JSON NOT NULL,
@@ -113,13 +114,12 @@ CREATE TABLE `dynamic_form_view_comp` (
 CREATE TABLE `extra_work_application` (
     `id` VARCHAR(36) NOT NULL,
     `userId` VARCHAR(36) NOT NULL,
-    `type` ENUM('Regular', 'Holiday', 'Emergency', 'Compensatory') NOT NULL,
+    `type` VARCHAR(191) NOT NULL,
     `startTime` DATETIME(3) NOT NULL,
     `endTime` DATETIME(3) NOT NULL,
     `description` VARCHAR(255) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-    `testId` VARCHAR(36) NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -146,6 +146,19 @@ CREATE TABLE `enum_detail` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `categoryId` VARCHAR(36) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `text_collection` (
+    `id` VARCHAR(36) NOT NULL,
+    `text` VARCHAR(250) NOT NULL,
+    `author` VARCHAR(50) NULL,
+    `source` VARCHAR(50) NULL,
+    `description` VARCHAR(255) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
