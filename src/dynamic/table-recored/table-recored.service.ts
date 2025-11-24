@@ -157,28 +157,24 @@ export class TableRecoredService {
         } else {
           if (value === undefined || value === null) {
             if (isUpdate) {
-              result[col.name] = null;
+              result[name] = null;
             }
           } else {
             if (colType === 'String') {
-              result[col.name] = String(value);
+              result[name] = String(value);
             } else if (colType === 'Boolean') {
-              result[col.name] = Boolean(value);
+              result[name] = Boolean(value);
             } else if (colType === 'DateTime') {
-              result[col.name] = new Date(value).toISOString();
+              result[name] = new Date(value).toISOString();
             } else if (colType === 'Int') {
-              result[col.name] = Number(value);
+              result[name] = Number(value);
             } else if (colType === 'Enum') {
               if (!enumCategoryId) {
                 throw new Error(
                   `当前数据表未正确配置字段：[${name}]的枚举类型`,
                 );
               }
-              const enumDetail = await this.enumsService.checkEnum(
-                enumCategoryId,
-                value,
-              );
-              result[col.name] = enumDetail.value;
+              result[name] = value;
             }
           }
         }
@@ -254,7 +250,7 @@ export class TableRecoredService {
       id: rawData.id,
     };
     for (const col of queryCols) {
-      const { name, colType, subTableType, fission } = col;
+      const { name, colType, subTableType, fission, transform } = col;
       let val = rawData[name];
       const subTableId = col.subTableId as string;
       if (colType === 'SubTable') {
@@ -280,15 +276,27 @@ export class TableRecoredService {
           }
         }
       } else if (colType === 'Enum') {
+        const enumDetail = await this.enumsService.checkEnum(
+          col.enumCategoryId,
+          val,
+        );
+        if (enumDetail) {
+          set(result, `${name}_desc`, enumDetail.name);
+        }
       } else {
       }
 
       /**
        * TODO: 实现数据转换
        */
-      // if (col.transform) {
-      //   val = col.transform(val);
-      // }
+      if (transform) {
+        try {
+          const transformFuc = new Function(transform)();
+          val = transformFuc(val, rawData);
+        } catch (error) {
+          throw new Error(`${name}转换失败`);
+        }
+      }
       result[name] = val;
       if (isArray(fission)) {
         if (colType === 'SubTable') {
@@ -298,15 +306,6 @@ export class TableRecoredService {
               : isPlainObject(val)
               ? get(val, formKey)
               : undefined;
-            set(result, toKey, fissionValue);
-          });
-        } else if (colType === 'Enum') {
-          const enumDetail = await this.enumsService.checkEnum(
-            col.enumCategoryId,
-            val,
-          );
-          (fission as any[]).forEach(({ formKey, toKey }) => {
-            const fissionValue = get(enumDetail, formKey);
             set(result, toKey, fissionValue);
           });
         }
@@ -351,6 +350,7 @@ export class TableRecoredService {
       });
       const rows = pageQuery ? data.rows : data;
       const total = pageQuery ? data.total : data.length;
+      console.log('ttt1', rows);
       for (const index in rows) {
         rows[index] = await this.rawDataTransition(
           rows[index],
@@ -358,6 +358,7 @@ export class TableRecoredService {
           tableIdOrName,
         );
       }
+      console.log('ttt2', rows);
       if (pageQuery) {
         return {
           total: total,
