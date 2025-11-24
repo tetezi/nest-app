@@ -1,10 +1,33 @@
+/*
+ * @Author: tetezi MaHouShouJoTetezi@foxmail.com
+ * @Date: 2024-09-26 13:47:05
+ * @LastEditors: tetezi MaHouShouJoTetezi@foxmail.com
+ * @LastEditTime: 2025-11-24 10:32:06
+ * @FilePath: \nest-app\src\main.ts
+ * @Description:
+ */
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from './config';
+import { networkInterfaces } from 'os';
+function getNetworkIp() {
+  const nets = networkInterfaces();
+  let ip = '';
 
+  Object.keys(nets).forEach((name) => {
+    nets[name]?.forEach((net) => {
+      // 跳过内部地址和IPv6地址
+      if (!net.internal && net.family === 'IPv4') {
+        ip = net.address;
+      }
+    });
+  });
+
+  return ip || 'localhost';
+}
 // 引导应用程序启动的主函数
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -34,10 +57,20 @@ async function bootstrap() {
   // 设置Swagger文档的访问路径
   SwaggerModule.setup('docs', app, document);
 
+  // 获取可用端口;
+  const port = configService.getOrThrow('app.port', { infer: true });
+
   // 启动应用并监听指定端口;
-  await app.listen(configService.getOrThrow('app.port', { infer: true }));
+  await app.listen(port);
+  const networkIp = getNetworkIp();
+
   console.log(
-    `Application is running on: ${await app.getUrl()}\n docs is running on ${await app.getUrl()}/docs`,
+    [
+      `启动成功`,
+      `Application is running on: http://localhost:${port}`,
+      `Local Network Access: http://${networkIp}:${port}`,
+      `Docs is running on http://${networkIp}:${port}/docs`,
+    ].join('\n'),
   );
 }
 void bootstrap();
