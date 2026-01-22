@@ -97,7 +97,9 @@ export class AuthService {
       type MenuWithSubMenus = Menu & { subMenus: Menu[] };
       const menus = roles.flatMap((role) => role.menus);
       const menuMap = new Map<string, MenuWithSubMenus>();
-
+      const sortMenusBySortField = (a: Menu, b: Menu) => {
+        return (a.sort ?? 0) - (b.sort ?? 0);
+      };
       menus.forEach((menu) => {
         menuMap.set(menu.id, { ...menu, subMenus: [] });
       });
@@ -109,14 +111,19 @@ export class AuthService {
           const parentMenu = menuMap.get(menu.parentMenuId);
           if (parentMenu) {
             const menuWithSubMenus = menuMap.get(menu.id);
-            menuWithSubMenus && parentMenu.subMenus.push(menuWithSubMenus);
+            if (menuWithSubMenus) {
+              parentMenu.subMenus.push(menuWithSubMenus);
+              parentMenu.subMenus.sort(sortMenusBySortField);
+            }
           }
         } else {
           const menuWithSubMenus = menuMap.get(menu.id);
-          menuWithSubMenus && rootMenus.push(menuWithSubMenus);
+          if (menuWithSubMenus) {
+            rootMenus.push(menuWithSubMenus);
+          }
         }
       });
-
+      rootMenus.sort(sortMenusBySortField);
       return rootMenus;
     }
   }

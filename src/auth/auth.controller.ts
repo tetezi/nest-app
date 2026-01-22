@@ -10,14 +10,12 @@ import { Controller, Post, Body, Get, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthLoginDto } from './dto/auth-login.dto';
-import { AllowPublicPost } from 'src/common/guards/post.guard';
 import { NoJwtRequired } from 'src/common/guards/jwt.guard';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @AllowPublicPost()
   @NoJwtRequired()
   @Post('login')
   login(@Body() authLoginDto: AuthLoginDto) {
