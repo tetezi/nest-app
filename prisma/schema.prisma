@@ -107,7 +107,7 @@ model DynamicCol {
   canQuery    Boolean        @default(true)
   colType     DynamicColType
   fission     Json?
-  transform String? @db.VarChar(255)
+  transform   String?        @db.VarChar(255)
 
   enumCategoryId String? @db.VarChar(36)
 
@@ -209,6 +209,7 @@ model EnumDetail {
   id          String       @id @default(uuid()) @db.VarChar(36)
   name        String       @db.VarChar(100)
   value       String       @db.VarChar(100)
+  tagColor    String?      @db.VarChar(9)
   description String?      @db.VarChar(255)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
