@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/user/user.service';
@@ -9,6 +9,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { RoleService } from 'src/role/role.service';
 import { Menu, User } from '@prisma/client';
 import { MenuService } from 'src/menu/menu.service';
+import { createHttpError } from 'src/utils/createHttpError';
 
 @Injectable()
 export class AuthService {
@@ -25,57 +26,40 @@ export class AuthService {
     const { userNo, password } = loginDto;
     const user = await this.userService.findUserByUserNo(userNo);
     if (!user) {
-      /**
-       * TODO 这里应该返回一个自定义的错误信息
-       */
-      throw new Error('User not found');
+      throw createHttpError(
+        '用户名或密码错误，请重新输入',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       throw new Error('Invalid password');
     }
-    const { token: accessToken } = await this.getToken(user);
-    return {
-      accessToken,
-      user,
-    };
-  }
-  /**
-   * TODO: 添加RefreshToken的功能
-   */
-  private async getToken(user: User) {
     const tokenExpiresIn = this.configService.getOrThrow('auth.expires', {
       infer: true,
     });
-
-    const token = await this.jwtService.signAsync(
-      {
-        userId: user.id,
-      },
-      {
-        secret: this.configService.getOrThrow('auth.secret', { infer: true }),
-        expiresIn: tokenExpiresIn,
-      },
-    );
-
+    const jwtPayload = {
+      userId: user.id,
+    };
+    const accessToken = await this.jwtService.signAsync(jwtPayload, {
+      secret: this.configService.getOrThrow('auth.secret', { infer: true }),
+      expiresIn: tokenExpiresIn,
+    });
     return {
-      token,
+      accessToken,
+      user: {
+        userId: user.id,
+        userNo: user.userNo,
+        name: user.name,
+      },
     };
   }
   async getMenuPermissionsByUserId(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      // include: {
-      //   roles: {
-      //     include: {
-      //       menus: {
-      //         where: {
-      //           isEnabled: true,
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
+      select: {
+        isAdmin: true,
+      },
     });
 
     if (!user) {

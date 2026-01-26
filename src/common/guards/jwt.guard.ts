@@ -6,10 +6,16 @@
  * @FilePath: \nest-app\src\common\guards\jwt.guard.ts
  * @Description:
  */
-import { ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
+import {
+  ExecutionContext,
+  HttpStatus,
+  Injectable,
+  SetMetadata,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
+import { createHttpError } from 'src/utils/createHttpError';
 
 // 定义「无需 JWT 认证」的装饰器 key（和 NoAdminRequired 逻辑一致）
 export const NO_JWT_REQUIRED_KEY = 'noJwtRequired';
@@ -36,5 +42,20 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     return super.canActivate(context);
+  }
+  //  重写 handleRequest 方法自定义错误信息
+  handleRequest(err: any, user: any, info: any) {
+    if (err || !user) {
+      let message = '登录状态失效，请重新登录';
+      if (info?.name === 'TokenExpiredError') {
+        message = '登录已过期，请重新登录';
+      } else if (info?.name === 'JsonWebTokenError') {
+        message = '无效的令牌，请提供正确的token';
+      }
+
+      throw createHttpError(message, HttpStatus.UNAUTHORIZED, err);
+    }
+    console.log('user', user);
+    return user;
   }
 }
