@@ -350,7 +350,6 @@ export class TableRecoredService {
       });
       const rows = pageQuery ? data.rows : data;
       const total = pageQuery ? data.total : data.length;
-      console.log('ttt1', rows);
       for (const index in rows) {
         rows[index] = await this.rawDataTransition(
           rows[index],
@@ -358,7 +357,6 @@ export class TableRecoredService {
           tableIdOrName,
         );
       }
-      console.log('ttt2', rows);
       if (pageQuery) {
         return {
           total: total,
