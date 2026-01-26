@@ -31,11 +31,6 @@ export class UserController {
     return this.userService.getAllUsers(pageQuery);
   }
 
-  @Get('findOne')
-  findOne(@Query('id', RequiredUUIDPipe) id: string) {
-    return this.userService.findUserById(id);
-  }
-
   // @Post('update')
   // update(
   //   @Query('id', new ParseUUIDPipe({ version: '4' })) id: string,
