@@ -25,15 +25,11 @@ export class AuthService {
   async authLogin(loginDto: AuthLoginDto) {
     const { userNo, password } = loginDto;
     const user = await this.userService.findUserByUserNo(userNo);
-    if (!user) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       throw createHttpError(
         '用户名或密码错误，请重新输入',
         HttpStatus.UNAUTHORIZED,
       );
-    }
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-      throw new Error('Invalid password');
     }
     const tokenExpiresIn = this.configService.getOrThrow('auth.expires', {
       infer: true,
