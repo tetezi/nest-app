@@ -22,7 +22,7 @@ export class TableRecoredController {
   }
 
   @Get('getTableRecoreds')
-  getTgetTableRecoredsables(
+  getTgetTableRecoreds(
     @Query('tableId') tableId: string,
     @Query('tableName') tableName: string,
     @Query(PaginationQueryPipe) page: PaginationQueryType,
