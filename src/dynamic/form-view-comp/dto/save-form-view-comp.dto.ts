@@ -34,8 +34,13 @@ export class SaveFormViewCompDto {
   @IsUUID('4')
   dynamicTableId?: string;
 
+  @IsOptional()
+  @IsUUID('4')
+  dynamicThirdPartyTableId?: string;
+
   @IsEnum(DynamicFormViewCompFormSourceType)
   formSourceType: DynamicFormViewCompFormSourceType;
+
   @IsOptional()
   @IsUUID('4')
   dynamicFormId?: string;

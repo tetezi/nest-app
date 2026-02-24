@@ -10,6 +10,7 @@ export class FormViewCompService {
     const {
       id,
       dynamicTableId,
+      dynamicThirdPartyTableId,
       dynamicFormId,
       name,
       tableColumns,
@@ -28,6 +29,14 @@ export class FormViewCompService {
           : id
           ? { disconnect: true }
           : undefined,
+      dynamicThirdPartyTable:
+        dataSourceType === 'DynamicThirdPartyTable'
+          ? {
+              connect: { id: dynamicThirdPartyTableId },
+            }
+          : id
+          ? { disconnect: true }
+          : undefined,
       formSourceType,
       dynamicForm:
         formSourceType === 'DynamicForm'
@@ -38,18 +47,32 @@ export class FormViewCompService {
           ? { disconnect: true }
           : undefined,
     };
-    await this.prisma.dynamicFormViewComp.upsert({
-      where: { id: id || '' },
-      update: data,
-      create: data,
-    });
+    if (id) {
+      return await this.prisma.dynamicFormViewComp.update({
+        where: { id: id || '' },
+        data: data,
+      });
+    } else {
+      await this.prisma.dynamicFormViewComp.create({
+        data: data,
+      });
+    }
+    // await this.prisma.dynamicFormViewComp.upsert({
+    //   where: { id: id || '' },
+    //   update: data,
+    //   create: data,
+    // });
   }
 
   async getFormViewComps(paginationQueryDto: PaginationQueryType) {
     return this.prisma.extendsService.dynamicFormViewComp.findManyByPagination(
       paginationQueryDto,
       {
-        include: { dynamicForm: true, dynamicTable: true },
+        include: {
+          dynamicForm: true,
+          dynamicTable: true,
+          dynamicThirdPartyTable: true,
+        },
         orderBy: { createdAt: 'desc' },
       },
     );
@@ -58,7 +81,11 @@ export class FormViewCompService {
   async getFormViewComp(id: string) {
     return await this.prisma.dynamicFormViewComp.findUnique({
       where: { id },
-      // include: { dynamicForm: true, dynamicTable: true },
+      include: {
+        dynamicForm: true,
+        dynamicTable: true,
+        dynamicThirdPartyTable: true,
+      },
     });
   }
 
