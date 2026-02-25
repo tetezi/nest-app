@@ -62,6 +62,9 @@ $ npx prisma migrate deploy
 
 # 标记迁移文件已被应用
 $ npx prisma migrate resolve --applied migration_name
+
+# 生成客户端代码
+$ npx prisma generate
 ```
 
 ## Test
