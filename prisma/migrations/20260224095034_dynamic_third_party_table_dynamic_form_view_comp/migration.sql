@@ -66,6 +66,7 @@ CREATE TABLE `dynamic_col` (
     `canQuery` BOOLEAN NOT NULL DEFAULT true,
     `colType` ENUM('String', 'Boolean', 'Int', 'DateTime', 'SubTable', 'Enum') NOT NULL,
     `fission` JSON NULL,
+    `transform` VARCHAR(255) NULL,
     `enumCategoryId` VARCHAR(36) NULL,
     `subTableType` ENUM('ToOne', 'ToMany') NULL,
     `subTableWritableStrategy` ENUM('ConnectById', 'UpsertByObject') NULL,
@@ -102,8 +103,9 @@ CREATE TABLE `dynamic_form_view_comp` (
     `description` VARCHAR(255) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-    `dataSourceType` ENUM('DynamicTable') NOT NULL,
+    `dataSourceType` ENUM('DynamicTable', 'DynamicThirdPartyTable') NOT NULL,
     `dynamicTableId` VARCHAR(191) NULL,
+    `dynamicThirdPartyTableId` VARCHAR(191) NULL,
     `formSourceType` ENUM('DynamicForm') NOT NULL,
     `dynamicFormId` VARCHAR(191) NULL,
 
@@ -142,6 +144,7 @@ CREATE TABLE `enum_detail` (
     `id` VARCHAR(36) NOT NULL,
     `name` VARCHAR(100) NOT NULL,
     `value` VARCHAR(100) NOT NULL,
+    `tagColor` VARCHAR(9) NULL,
     `description` VARCHAR(255) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -156,6 +159,23 @@ CREATE TABLE `text_collection` (
     `text` VARCHAR(250) NOT NULL,
     `author` VARCHAR(50) NULL,
     `source` VARCHAR(50) NULL,
+    `description` VARCHAR(255) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `dynamic_third_party_table` (
+    `id` VARCHAR(36) NOT NULL,
+    `name` VARCHAR(50) NOT NULL,
+    `key` VARCHAR(50) NOT NULL,
+    `addUrl` VARCHAR(255) NOT NULL,
+    `delUrl` VARCHAR(255) NOT NULL,
+    `editUrl` VARCHAR(255) NOT NULL,
+    `getListUrl` VARCHAR(255) NOT NULL,
+    `getDetailUrl` VARCHAR(255) NOT NULL,
     `description` VARCHAR(255) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -192,6 +212,9 @@ ALTER TABLE `dynamic_col` ADD CONSTRAINT `dynamic_col_tableId_fkey` FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE `dynamic_form_view_comp` ADD CONSTRAINT `dynamic_form_view_comp_dynamicTableId_fkey` FOREIGN KEY (`dynamicTableId`) REFERENCES `dynamic_table`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `dynamic_form_view_comp` ADD CONSTRAINT `dynamic_form_view_comp_dynamicThirdPartyTableId_fkey` FOREIGN KEY (`dynamicThirdPartyTableId`) REFERENCES `dynamic_third_party_table`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `dynamic_form_view_comp` ADD CONSTRAINT `dynamic_form_view_comp_dynamicFormId_fkey` FOREIGN KEY (`dynamicFormId`) REFERENCES `dynamic_form`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

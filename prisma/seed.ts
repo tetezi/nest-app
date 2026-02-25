@@ -808,8 +808,8 @@ async function main() {
   await initDynamicTableRecored(testUser.id);
 }
 
-main()
-  .catch((e) => console.error(e))
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// main()
+//   .catch((e) => console.error(e))
+//   .finally(async () => {
+//     await prisma.$disconnect();
+//   });

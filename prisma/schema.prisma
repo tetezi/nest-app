@@ -150,7 +150,7 @@ model DynamicForm {
 
 enum DynamicFormViewCompDataSourceType {
   DynamicTable
-  // OtherTable
+  DynamicThirdPartyTable
 }
 
 enum DynamicFormViewCompFormSourceType {
@@ -170,6 +170,10 @@ model DynamicFormViewComp {
   //TODO ： 此处仍需添加其他数据源配置，如分页，保存，获取等第三方数据源api
   dynamicTable   DynamicTable?                     @relation("dynamicFormViewCompTable", fields: [dynamicTableId], references: [id])
   dynamicTableId String?
+
+  dynamicThirdPartyTable   DynamicThirdPartyTable? @relation("dynamicFormViewCompThirdPartyTable", fields: [dynamicThirdPartyTableId], references: [id])
+  dynamicThirdPartyTableId String?
+
   //TODO ： 此处仍需添加其他表单，如、第三方url，通过传入初始化数据及提交接口，实现表单获取保存
   formSourceType DynamicFormViewCompFormSourceType
   dynamicForm    DynamicForm?                      @relation("dynamicFormViewCompForm", fields: [dynamicFormId], references: [id])
@@ -229,4 +233,40 @@ model TextCollection {
   updatedAt   DateTime @updatedAt
 
   @@map("text_collection")
+}
+
+model DynamicThirdPartyTable {
+  id           String  @id @default(uuid()) @db.VarChar(36)
+  name         String  @db.VarChar(50)
+  key          String  @db.VarChar(50)
+  addUrl       String? @db.VarChar(255)
+  delUrl       String? @db.VarChar(255)
+  editUrl      String? @db.VarChar(255)
+  getListUrl   String? @db.VarChar(255)
+  getDetailUrl String? @db.VarChar(255)
+
+  description         String?               @db.VarChar(255)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  dynamicFormViewComp DynamicFormViewComp[] @relation("dynamicFormViewCompThirdPartyTable")
+
+  @@map("dynamic_third_party_table")
+}
+
+model ReservationOrder {
+  id                   String   @id @default(uuid()) @db.VarChar(36) // 预订单ID，主键，自动生成UUID 
+  amount               Decimal  @db.Decimal(10, 2) // 预定金额，数字输入框，保留两位小数
+  productType          String // 预定商品类型，下拉框
+  reservationStatus    String // 预定状态，枚举下拉框
+  isDepositPaid        Boolean // 是否支付定金，滑块开关
+  depositAmount        Decimal?  @db.Decimal(10, 2) // 定金金额，数字输入框，保留两位小数
+  reservationStartTime DateTime // 预定开始时间，日期选择器
+  reservationEndTime   DateTime // 预定结束时间，日期选择器
+  contactPhone         String // 联系电话，文本输入框
+  specialRequirements  String? // 特殊要求，折叠栏内展示
+
+  createdAt DateTime @default(now()) // 创建时间，自动生成
+  updatedAt DateTime @updatedAt // 更新时间，自动更新
+
+  @@map("reservation_order")
 }
