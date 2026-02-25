@@ -283,7 +283,8 @@ export class TableRecoredService {
         if (enumDetail) {
           set(result, `${name}_desc`, enumDetail.name);
         }
-      } else {
+      } else if (colType === 'Int') {
+        val = Number(val);
       }
 
       /**
