@@ -175,6 +175,8 @@ export class TableRecoredService {
                 );
               }
               result[name] = value;
+            } else if (colType === 'Json') {
+              result[name] = value;
             }
           }
         }

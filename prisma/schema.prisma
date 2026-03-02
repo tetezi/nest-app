@@ -83,6 +83,7 @@ enum DynamicColType {
   DateTime
   SubTable
   Enum
+  Json
 }
 
 enum SubTableType {
@@ -259,10 +260,11 @@ model ReservationOrder {
   productType          String // 预定商品类型，下拉框
   reservationStatus    String // 预定状态，枚举下拉框
   isDepositPaid        Boolean // 是否支付定金，滑块开关
-  depositAmount        Decimal?  @db.Decimal(10, 2) // 定金金额，数字输入框，保留两位小数
+  depositAmount        Decimal? @db.Decimal(10, 2) // 定金金额，数字输入框，保留两位小数
   reservationStartTime DateTime // 预定开始时间，日期选择器
   reservationEndTime   DateTime // 预定结束时间，日期选择器
   contactPhone         String // 联系电话，文本输入框
+  productList          Json? // 联系电话，文本输入框
   specialRequirements  String? // 特殊要求，折叠栏内展示
 
   createdAt DateTime @default(now()) // 创建时间，自动生成
