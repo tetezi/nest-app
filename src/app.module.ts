@@ -9,6 +9,7 @@ import { RoleModule } from './role/role.module';
 import { MenuModule } from './menu/menu.module';
 import { DynamicModule } from './dynamic/dynamic.module';
 import { EnumModule } from './enum/enum.module';
+import { OpenAIModule } from './openAI/openAI.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,6 +25,7 @@ import { EnumModule } from './enum/enum.module';
     MenuModule,
     DynamicModule,
     EnumModule,
+    OpenAIModule,
   ],
 })
 export class AppModule {}
